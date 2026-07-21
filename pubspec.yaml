@@ -1,0 +1,58 @@
+name: anvil
+description: "Godam Ledger — offline-first ledger and cost-accounting tool for a scrap/raw-material trading business."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.11.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+
+  # State management (approved — do not mix in provider/bloc)
+  flutter_riverpod: ^2.6.1
+
+  # Local DB — single source of truth on-device (approved — no raw sqflite)
+  drift: ^2.28.2
+  sqlite3: ^2.9.0
+  sqlite3_flutter_libs: ^0.5.40
+  path_provider: ^2.1.5
+  path: ^1.9.1
+
+  # UUIDv4 keys, generated client-side for every PK/FK
+  uuid: ^4.5.1
+
+  # Backup/sync backend — metadata/backup only (never photo binaries)
+  supabase_flutter: ^2.9.1
+
+  # PIN hash storage
+  flutter_secure_storage: ^9.2.4
+
+  # Charts (verify WCAG AA contrast before shipping any chart)
+  fl_chart: ^1.1.1
+
+  # Native share sheet → WhatsApp etc.
+  share_plus: ^12.0.1
+
+  # Widget-to-image for branded receipts
+  screenshot: ^3.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^6.0.0
+
+  # Drift codegen
+  drift_dev: ^2.28.2
+  build_runner: ^2.9.0
+
+  # Mocking for domain/repository tests
+  mocktail: ^1.0.4
+
+flutter:
+  uses-material-design: true

@@ -1,0 +1,1060 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#e9e9e7;font-family:'Inter',-apple-system,system-ui,sans-serif}
+* {box-sizing:border-box}
+::-webkit-scrollbar{display:none}
+a{color:#0052ff}
+a:hover{color:#003ecc}
+input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+input[type=number]{-moz-appearance:textfield}
+</style>
+</helmet>
+<div style="display:flex;justify-content:center;padding:40px 20px;background:#e9e9e7;min-height:100vh">
+<x-import component-from-global-scope="AndroidDevice" from="./android-frame.jsx" dark="{{isDark}}" hint-size="412px,892px">
+  <div style="display:flex;flex-direction:column;height:100%;background:{{c.canvas}};font-family:'Inter',sans-serif;transition:background 0.2s">
+
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px 10px;background:{{c.canvas}};flex-shrink:0">
+      <sc-if value="{{showBack}}" hint-placeholder-val="{{false}}">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div onClick="{{goBack}}" style="width:34px;height:34px;border-radius:9999px;background:{{c.surfaceStrong}};display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;color:{{c.ink}}">‹</div>
+          <span style="font-size:16px;font-weight:600;color:{{c.ink}}">{{screenTitle}}</span>
+        </div>
+      </sc-if>
+      <sc-if value="{{showLogo}}" hint-placeholder-val="{{true}}">
+        <div style="display:flex;align-items:center;gap:8px;min-width:0">
+          <div style="width:30px;height:30px;border-radius:9999px;background:{{c.primary}};flex-shrink:0"></div>
+          <span style="font-size:15px;font-weight:600;letter-spacing:-0.2px;color:{{c.ink}};white-space:nowrap">Godam Ledger</span>
+        </div>
+      </sc-if>
+      <div onClick="{{toggleTheme}}" style="display:flex;align-items:center;gap:6px;padding:4px;border-radius:9999px;background:{{c.surfaceStrong}};cursor:pointer;width:52px;height:28px;position:relative">
+        <div style="{{themeDotStyle}}"></div>
+      </div>
+    </div>
+
+    <div style="flex:1;overflow-y:auto;padding-bottom:8px">
+
+      <sc-if value="{{isDashboard}}" hint-placeholder-val="{{true}}">
+        <div style="padding:4px 16px 24px;display:flex;flex-direction:column;gap:20px">
+
+          <div style="background:{{c.surfaceDark}};border-radius:24px;padding:24px;display:flex;flex-direction:column;gap:14px">
+            <span style="font-size:12px;font-weight:600;letter-spacing:0.4px;color:{{c.onDarkSoft}};text-transform:uppercase">Net worth</span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:32px;font-weight:600;letter-spacing:-0.5px;color:#ffffff">{{netWorthFmt}}</span>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px">
+              <div style="background:{{c.surfaceDarkElevated}};border-radius:100px;padding:6px 12px;display:flex;flex-direction:column">
+                <span style="font-size:10px;color:{{c.onDarkSoft}}">Cash on hand</span>
+                <span style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:500;color:#fff">{{cashTotalFmt}}</span>
+              </div>
+              <div style="background:{{c.surfaceDarkElevated}};border-radius:100px;padding:6px 12px;display:flex;flex-direction:column">
+                <span style="font-size:10px;color:{{c.onDarkSoft}}">Stock value</span>
+                <span style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:500;color:#fff">{{stockValueFmt}}</span>
+              </div>
+              <div style="background:{{c.surfaceDarkElevated}};border-radius:100px;padding:6px 12px;display:flex;flex-direction:column">
+                <span style="font-size:10px;color:{{c.onDarkSoft}}">Receivable − payable</span>
+                <span style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:500;color:#fff">{{netPartyFmt}}</span>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;align-items:baseline;justify-content:space-between">
+              <span style="font-size:16px;font-weight:600;color:{{c.ink}}">Monthly profit</span>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:13px;color:{{selectedMonthColor}}">{{selectedMonthFmt}}</span>
+            </div>
+            <div style="background:{{c.card}};border:1px solid {{c.hairline}};border-radius:24px;padding:20px 16px 16px;display:flex;flex-direction:column;gap:10px">
+              <div style="display:flex;align-items:flex-end;gap:8px;height:100px">
+                <sc-for list="{{monthlyBars}}" as="m" hint-placeholder-count="6">
+                  <div onClick="{{m.select}}" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;cursor:pointer;gap:6px">
+                    <div style="{{m.barStyle}}"></div>
+                    <span style="font-size:10px;color:{{m.labelColor}};font-weight:{{m.labelWeight}}">{{m.label}}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+
+          <div style="background:{{c.card}};border:1px solid {{c.hairline}};border-radius:24px;padding:20px;display:flex;flex-direction:column;gap:14px">
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <span style="font-size:16px;font-weight:600;color:{{c.ink}}">Receivables &amp; payables</span>
+              <span onClick="{{goParties}}" style="font-size:13px;color:{{c.primary}};font-weight:600;cursor:pointer">All parties</span>
+            </div>
+            <sc-for list="{{topParties}}" as="p" hint-placeholder-count="3">
+              <div onClick="{{p.open}}" style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-top:1px solid {{c.hairlineSoft}};cursor:pointer">
+                <div style="display:flex;align-items:center;gap:10px">
+                  <div style="width:34px;height:34px;border-radius:9999px;background:{{c.surfaceStrong}};display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:{{c.ink}}">{{p.initial}}</div>
+                  <div style="display:flex;flex-direction:column">
+                    <span style="font-size:14px;font-weight:500;color:{{c.ink}}">{{p.name}}</span>
+                    <span style="font-size:12px;color:{{c.muted}}">{{p.role}}</span>
+                  </div>
+                </div>
+                <span style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:500;color:{{p.color}}">{{p.amountFmt}}</span>
+              </div>
+            </sc-for>
+          </div>
+
+          <div onClick="{{goCash}}" style="display:flex;gap:10px;cursor:pointer">
+            <div style="flex:1;background:{{c.card}};border:1px solid {{c.hairline}};border-radius:20px;padding:14px;display:flex;flex-direction:column;gap:2px">
+              <span style="font-size:11px;color:{{c.muted}}">Home</span>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:500;color:{{c.ink}}">{{cashHomeFmt}}</span>
+            </div>
+            <div style="flex:1;background:{{c.card}};border:1px solid {{c.hairline}};border-radius:20px;padding:14px;display:flex;flex-direction:column;gap:2px">
+              <span style="font-size:11px;color:{{c.muted}}">Bank</span>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:500;color:{{c.ink}}">{{cashBankFmt}}</span>
+            </div>
+            <div style="flex:1;background:{{c.card}};border:1px solid {{c.hairline}};border-radius:20px;padding:14px;display:flex;flex-direction:column;gap:2px">
+              <span style="font-size:11px;color:{{c.muted}}">Godam</span>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:500;color:{{c.ink}}">{{cashGodamFmt}}</span>
+            </div>
+          </div>
+
+          <div style="background:{{c.surfaceSoft}};border-radius:24px;padding:20px;display:flex;flex-direction:column;gap:8px">
+            <span style="font-size:12px;font-weight:600;letter-spacing:0.4px;color:{{c.muted}};text-transform:uppercase">This month, in plain terms</span>
+            <p style="font-size:14px;line-height:1.55;color:{{c.body}};margin:0">{{takeawayText}}</p>
+          </div>
+
+        </div>
+      </sc-if>
+
+      <sc-if value="{{isParties}}" hint-placeholder-val="{{false}}">
+        <div style="padding:4px 16px 24px;display:flex;flex-direction:column;gap:16px">
+          <div style="display:flex;gap:10px">
+            <div style="flex:1;background:{{c.card}};border:1px solid {{c.hairline}};border-radius:18px;padding:14px;display:flex;flex-direction:column;gap:2px">
+              <span style="font-size:11px;color:{{c.muted}}">Total receivable</span>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:600;color:{{c.semanticUp}}">{{totalReceivableFmt}}</span>
+            </div>
+            <div style="flex:1;background:{{c.card}};border:1px solid {{c.hairline}};border-radius:18px;padding:14px;display:flex;flex-direction:column;gap:2px">
+              <span style="font-size:11px;color:{{c.muted}}">Total payable</span>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:600;color:{{c.semanticDown}}">{{totalPayableFmt}}</span>
+            </div>
+          </div>
+          <div style="display:flex;background:{{c.surfaceStrong}};border-radius:100px;padding:4px">
+            <sc-for list="{{partyFilters}}" as="pf" hint-placeholder-count="3">
+              <div onClick="{{pf.select}}" style="{{pf.pillStyle}}">{{pf.label}}</div>
+            </sc-for>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <sc-for list="{{filteredParties}}" as="p" hint-placeholder-count="4">
+              <div onClick="{{p.open}}" style="background:{{c.card}};border:1px solid {{c.hairline}};border-radius:18px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer">
+                <div style="display:flex;align-items:center;gap:10px">
+                  <div style="width:36px;height:36px;border-radius:9999px;background:{{c.surfaceStrong}};display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:{{c.ink}}">{{p.initial}}</div>
+                  <div style="display:flex;flex-direction:column">
+                    <span style="font-size:14px;font-weight:500;color:{{c.ink}}">{{p.name}}</span>
+                    <span style="font-size:12px;color:{{c.muted}}">{{p.typeLabel}}</span>
+                  </div>
+                </div>
+                <span style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:500;color:{{p.color}}">{{p.amountFmt}}</span>
+              </div>
+            </sc-for>
+          </div>
+          <div style="border:1px dashed {{c.hairline}};border-radius:16px;padding:12px;text-align:center;font-size:13px;color:{{c.primary}};font-weight:600">+ Add party</div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{isPartyDetail}}" hint-placeholder-val="{{false}}">
+        <div style="padding:4px 16px 24px;display:flex;flex-direction:column;gap:16px">
+          <div style="background:{{c.card}};border:1px solid {{c.hairline}};border-radius:24px;padding:20px;display:flex;flex-direction:column;gap:6px">
+            <span style="font-size:12px;color:{{c.muted}}">{{selectedParty.typeLabel}} · {{selectedParty.phone}}</span>
+            <span style="font-size:12px;font-weight:600;letter-spacing:0.4px;color:{{c.muted}};text-transform:uppercase">{{selectedParty.balanceLabel}}</span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:26px;font-weight:600;color:{{selectedParty.color}}">{{selectedParty.amountFmt}}</span>
+            <sc-if value="{{selectedParty.hasAdvance}}" hint-placeholder-val="{{false}}">
+              <span style="font-size:12px;color:{{c.muted}};margin-top:4px">Includes {{selectedParty.advanceFmt}} unallocated advance</span>
+            </sc-if>
+          </div>
+
+          <div style="display:flex;background:{{c.surfaceStrong}};border-radius:100px;padding:4px">
+            <sc-for list="{{partyDetailTabs}}" as="t" hint-placeholder-count="2">
+              <div onClick="{{t.select}}" style="{{t.pillStyle}}">{{t.label}}</div>
+            </sc-for>
+          </div>
+
+          <sc-if value="{{showPartyBills}}" hint-placeholder-val="{{true}}">
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <sc-for list="{{selectedParty.bills}}" as="b" hint-placeholder-count="3">
+                <div style="background:{{c.card}};border:1px solid {{c.hairline}};border-radius:16px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between">
+                  <div style="display:flex;flex-direction:column">
+                    <span style="font-size:13px;font-weight:500;color:{{c.ink}}">{{b.typeLabel}}</span>
+                    <span style="font-size:11px;color:{{c.muted}}">{{b.date}}</span>
+                  </div>
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:500;color:{{c.ink}}">{{b.amountFmt}}</span>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{showPartyPayments}}" hint-placeholder-val="{{false}}">
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <sc-for list="{{selectedParty.payments}}" as="pay" hint-placeholder-count="3">
+                <div style="background:{{c.card}};border:1px solid {{c.hairline}};border-radius:16px;padding:12px 14px;display:flex;flex-direction:column;gap:6px">
+                  <div style="display:flex;align-items:center;justify-content:space-between">
+                    <div style="display:flex;flex-direction:column">
+                      <span style="font-size:13px;font-weight:500;color:{{c.ink}}">via {{pay.pool}}</span>
+                      <span style="font-size:11px;color:{{c.muted}}">{{pay.date}}</span>
+                    </div>
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:500;color:{{c.ink}}">{{pay.amountFmt}}</span>
+                  </div>
+                  <sc-if value="{{pay.isReversed}}" hint-placeholder-val="{{false}}">
+                    <span style="font-size:11px;color:{{c.semanticDown}}">Reversed {{pay.reversedDate}} — {{pay.reversedNote}}</span>
+                  </sc-if>
+                  <sc-if value="{{pay.canReverse}}" hint-placeholder-val="{{false}}">
+                    <span onClick="{{pay.reverse}}" style="font-size:12px;color:{{c.primary}};font-weight:600;cursor:pointer">Reverse payment</span>
+                  </sc-if>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+
+          <div onClick="{{openHistory}}" style="text-align:center;font-size:12px;color:{{c.muted}};cursor:pointer;padding-top:4px">View update history</div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{isStock}}" hint-placeholder-val="{{false}}">
+        <div style="padding:4px 16px 24px;display:flex;flex-direction:column;gap:16px">
+
+          <div style="background:{{c.card}};border:1px solid {{c.hairline}};border-radius:24px;padding:20px;display:flex;flex-direction:column;gap:6px">
+            <span style="font-size:12px;font-weight:600;letter-spacing:0.4px;color:{{c.muted}};text-transform:uppercase">All stock, at cost</span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:26px;font-weight:600;color:{{c.ink}}">{{stockValueFmt}}</span>
+            <span style="font-size:12px;color:{{c.muted}};margin-top:2px">Blended rate not shown — categories are too dissimilar to average meaningfully.</span>
+          </div>
+
+          <sc-for list="{{categories}}" as="cat" hint-placeholder-count="3">
+            <div style="background:{{c.card}};border:1px solid {{c.hairline}};border-radius:24px;padding:20px;display:flex;flex-direction:column;gap:14px">
+              <div style="display:flex;align-items:center;justify-content:space-between">
+                <span style="font-size:17px;font-weight:600;color:{{c.ink}}">{{cat.name}}</span>
+                <span style="font-family:'JetBrains Mono',monospace;font-size:14px;color:{{c.body}}">{{cat.qtyFmt}}</span>
+              </div>
+
+              <div style="display:flex;gap:10px">
+                <div style="flex:1;background:{{c.surfaceSoft}};border-radius:16px;padding:12px">
+                  <div style="font-size:11px;color:{{c.muted}};margin-bottom:2px">Avg cost / kg</div>
+                  <div style="font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:500;color:{{c.ink}}">{{cat.avgCostKgFmt}}</div>
+                </div>
+                <div style="flex:1;background:{{c.surfaceSoft}};border-radius:16px;padding:12px">
+                  <div style="font-size:11px;color:{{c.muted}};margin-bottom:2px">Stock value</div>
+                  <div style="font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:500;color:{{c.ink}}">{{cat.stockValueFmt}}</div>
+                </div>
+              </div>
+
+              <div onClick="{{cat.toggleExplain}}" style="border:1px solid {{c.hairline}};border-radius:16px;padding:12px 14px;cursor:pointer;display:flex;flex-direction:column;gap:8px">
+                <div style="display:flex;align-items:center;justify-content:space-between">
+                  <div style="display:flex;flex-direction:column">
+                    <span style="font-size:11px;color:{{c.muted}}">Recommended rate ({{cat.marginPct}}% margin)</span>
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:600;color:{{c.primary}}">{{cat.recRateFmt}}</span>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:4px">
+                    <div onClick="{{cat.decMargin}}" style="width:26px;height:26px;border-radius:9999px;background:{{c.surfaceStrong}};display:flex;align-items:center;justify-content:center;font-size:14px;color:{{c.ink}};font-weight:600">–</div>
+                    <div onClick="{{cat.incMargin}}" style="width:26px;height:26px;border-radius:9999px;background:{{c.surfaceStrong}};display:flex;align-items:center;justify-content:center;font-size:14px;color:{{c.ink}};font-weight:600">+</div>
+                  </div>
+                </div>
+                <sc-if value="{{cat.explainOpen}}" hint-placeholder-val="{{false}}">
+                  <div style="font-size:12px;color:{{c.body}};line-height:1.5;border-top:1px solid {{c.hairlineSoft}};padding-top:8px">
+                    {{cat.avgCostKgFmt}} avg cost + {{cat.marginPct}}% margin = {{cat.recRateFmt}} per kg.
+                  </div>
+                </sc-if>
+              </div>
+
+              <div onClick="{{cat.toggleExpand}}" style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding-top:2px">
+                <span style="font-size:13px;font-weight:500;color:{{c.body}}">Sub-category breakdown</span>
+                <span style="font-size:13px;color:{{c.muted}}">{{cat.expandLabel}}</span>
+              </div>
+              <sc-if value="{{cat.expanded}}" hint-placeholder-val="{{false}}">
+                <div style="display:flex;flex-direction:column;gap:6px;margin-top:-6px">
+                  <sc-for list="{{cat.subs}}" as="sub" hint-placeholder-count="2">
+                    <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:{{c.surfaceSoft}};border-radius:12px">
+                      <span style="font-size:13px;color:{{c.ink}}">{{sub.name}}</span>
+                      <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:{{c.muted}}">{{sub.qtyFmt}}</span>
+                    </div>
+                  </sc-for>
+                </div>
+              </sc-if>
+
+              <div style="display:flex;gap:8px">
+                <div onClick="{{cat.viewLedger}}" style="flex:1;border:1px dashed {{c.hairline}};border-radius:14px;padding:10px;text-align:center;font-size:12px;color:{{c.primary}};font-weight:600;cursor:pointer">Full ledger</div>
+                <div onClick="{{cat.writeOff}}" style="flex:1;border:1px dashed {{c.hairline}};border-radius:14px;padding:10px;text-align:center;font-size:12px;color:{{c.body}};font-weight:600;cursor:pointer">Write off / wastage</div>
+              </div>
+
+              <sc-if value="{{cat.writeOffOpen}}" hint-placeholder-val="{{false}}">
+                <div style="background:{{c.surfaceSoft}};border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:10px">
+                  <span style="font-size:12px;color:{{c.muted}}">Weight to remove (kg)</span>
+                  <input type="number" value="{{cat.writeOffQty}}" onChange="{{cat.onWriteOffQtyChange}}" style="{{inputStyle}}" />
+                  <div style="display:flex;gap:8px">
+                    <div onClick="{{cat.setAbsorb}}" style="{{cat.absorbPillStyle}}">Absorb into remaining stock</div>
+                    <div onClick="{{cat.setExpense}}" style="{{cat.expensePillStyle}}">Log as wastage expense</div>
+                  </div>
+                  <div onClick="{{cat.confirmWriteOff}}" style="text-align:center;padding:10px;border-radius:100px;background:{{c.primary}};color:#fff;font-size:13px;font-weight:600;cursor:pointer">Confirm write-off</div>
+                </div>
+              </sc-if>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{isStockLedger}}" hint-placeholder-val="{{false}}">
+        <div style="padding:4px 16px 24px;display:flex;flex-direction:column;gap:10px">
+          <span style="font-size:13px;color:{{c.muted}}">Chronological, oldest first — running balance shown for trust.</span>
+          <sc-for list="{{ledgerRows}}" as="r" hint-placeholder-count="6">
+            <div style="background:{{c.card}};border:1px solid {{c.hairline}};border-radius:16px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between">
+              <div style="display:flex;flex-direction:column">
+                <span style="font-size:13px;font-weight:500;color:{{c.ink}}">{{r.label}}</span>
+                <span style="font-size:11px;color:{{c.muted}}">{{r.date}} · balance {{r.balanceFmt}}</span>
+              </div>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:500;color:{{r.color}}">{{r.qtyFmt}}</span>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{isCash}}" hint-placeholder-val="{{false}}">
+        <div style="padding:4px 16px 24px;display:flex;flex-direction:column;gap:16px">
+          <div style="display:flex;gap:10px">
+            <sc-for list="{{cashPoolCards}}" as="pool" hint-placeholder-count="3">
+              <div style="flex:1;background:{{c.card}};border:1px solid {{c.hairline}};border-radius:18px;padding:14px;display:flex;flex-direction:column;gap:2px">
+                <span style="font-size:11px;color:{{c.muted}}">{{pool.label}}</span>
+                <span style="font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:600;color:{{c.ink}}">{{pool.amountFmt}}</span>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="background:{{c.surfaceSoft}};border-radius:18px;padding:16px;display:flex;align-items:center;justify-content:space-between">
+            <div style="display:flex;flex-direction:column;gap:2px">
+              <span style="font-size:12px;color:{{c.muted}}">Reconciliation</span>
+              <span style="font-size:13px;color:{{c.ink}}">{{reconciliationText}}</span>
+            </div>
+          </div>
+
+          <div onClick="{{toggleTransferForm}}" style="text-align:center;padding:12px;border-radius:100px;background:{{c.primary}};color:#fff;font-size:13px;font-weight:600;cursor:pointer">Transfer to Godam</div>
+
+          <sc-if value="{{transferFormOpen}}" hint-placeholder-val="{{false}}">
+            <div style="background:{{c.card}};border:1px solid {{c.hairline}};border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:10px">
+              <div style="display:flex;gap:8px">
+                <sc-for list="{{transferFromChips}}" as="tf" hint-placeholder-count="2">
+                  <div onClick="{{tf.select}}" style="{{tf.chipStyle}}">{{tf.label}}</div>
+                </sc-for>
+              </div>
+              <input type="number" placeholder="Amount" value="{{transferAmount}}" onChange="{{onTransferAmountChange}}" style="{{inputStyle}}" />
+              <div onClick="{{confirmTransfer}}" style="text-align:center;padding:10px;border-radius:100px;background:{{c.surfaceDark}};color:#fff;font-size:13px;font-weight:600;cursor:pointer">Confirm transfer</div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{overdraftWarning}}" hint-placeholder-val="{{false}}">
+            <div style="background:{{c.surfaceSoft}};border:1px solid {{c.hairline}};border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:10px">
+              <span style="font-size:13px;color:{{c.ink}};line-height:1.5">Godam cash will show -Rs. 15,000. Did you forget to record a transfer from Home/Bank?</span>
+              <div style="display:flex;gap:8px">
+                <div style="flex:1;text-align:center;padding:10px;border-radius:100px;background:{{c.primary}};color:#fff;font-size:13px;font-weight:600">Record Transfer Now</div>
+                <div style="flex:1;text-align:center;padding:10px;border-radius:100px;background:{{c.surfaceStrong}};color:{{c.ink}};font-size:13px;font-weight:600">Continue Anyway</div>
+              </div>
+            </div>
+          </sc-if>
+
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <span style="font-size:15px;font-weight:600;color:{{c.ink}}">Godam ledger</span>
+            <sc-for list="{{godamLedger}}" as="g" hint-placeholder-count="4">
+              <div onClick="{{g.toggle}}" style="background:{{c.card}};border:1px solid {{c.hairline}};border-radius:16px;padding:12px 14px;display:flex;flex-direction:column;gap:6px;cursor:pointer">
+                <div style="display:flex;align-items:center;justify-content:space-between">
+                  <div style="display:flex;flex-direction:column">
+                    <span style="font-size:13px;font-weight:500;color:{{c.ink}}">{{g.label}}</span>
+                    <span style="font-size:11px;color:{{c.muted}}">{{g.date}} · balance {{g.balanceFmt}}</span>
+                  </div>
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:500;color:{{g.color}}">{{g.amountFmt}}</span>
+                </div>
+                <sc-if value="{{g.traceOpen}}" hint-placeholder-val="{{false}}">
+                  <div style="font-size:12px;color:{{c.body}};border-top:1px solid {{c.hairlineSoft}};padding-top:6px">{{g.traceText}}</div>
+                </sc-if>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{isMore}}" hint-placeholder-val="{{false}}">
+        <div style="padding:4px 16px 24px;display:flex;flex-direction:column;gap:8px">
+          <sc-for list="{{moreRows}}" as="row" hint-placeholder-count="6">
+            <div onClick="{{row.open}}" style="background:{{c.card}};border:1px solid {{c.hairline}};border-radius:16px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer">
+              <div style="display:flex;flex-direction:column">
+                <span style="font-size:14px;font-weight:500;color:{{c.ink}}">{{row.label}}</span>
+                <span style="font-size:12px;color:{{c.muted}}">{{row.sub}}</span>
+              </div>
+              <span style="font-size:16px;color:{{c.muted}}">›</span>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{isTrash}}" hint-placeholder-val="{{false}}">
+        <div style="padding:4px 16px 24px;display:flex;flex-direction:column;gap:8px">
+          <span style="font-size:13px;color:{{c.muted}}">Deleted items are recoverable for 30 days, then auto-purged.</span>
+          <sc-for list="{{trashItems}}" as="t" hint-placeholder-count="3">
+            <div style="background:{{c.card}};border:1px solid {{c.hairline}};border-radius:16px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between">
+              <div style="display:flex;flex-direction:column">
+                <span style="font-size:13px;font-weight:500;color:{{c.ink}}">{{t.name}}</span>
+                <span style="font-size:11px;color:{{c.muted}}">{{t.typeLabel}} · deleted {{t.deletedDate}} · {{t.daysRemaining}} days left</span>
+              </div>
+              <span style="font-size:12px;color:{{c.primary}};font-weight:600;cursor:pointer">Restore</span>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{isBackup}}" hint-placeholder-val="{{false}}">
+        <div style="padding:4px 16px 24px;display:flex;flex-direction:column;gap:16px">
+          <div style="background:{{c.card}};border:1px solid {{c.hairline}};border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:6px">
+            <span style="font-size:12px;color:{{c.muted}}">Last backup</span>
+            <span style="font-size:14px;font-weight:500;color:{{c.ink}}">Today, 6:42 AM · synced</span>
+          </div>
+          <div style="text-align:center;padding:12px;border-radius:100px;background:{{c.primary}};color:#fff;font-size:13px;font-weight:600;cursor:pointer">Backup now</div>
+          <div style="background:{{c.surfaceSoft}};border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:8px">
+            <span style="font-size:13px;font-weight:600;color:{{c.ink}}">Restore on a new device</span>
+            <p style="font-size:13px;color:{{c.body}};line-height:1.5;margin:0">Sign in with the same account on the new device to pull down your last backup. Bill photos stay on the original device — they are never uploaded.</p>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{isPin}}" hint-placeholder-val="{{false}}">
+        <div style="padding:4px 16px 24px;display:flex;flex-direction:column;gap:16px">
+          <div style="background:{{c.card}};border:1px solid {{c.hairline}};border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:10px">
+            <span style="font-size:13px;font-weight:600;color:{{c.ink}}">Admin PIN</span>
+            <span style="font-size:12px;color:{{c.muted}}">Full control — create, edit, delete, backup, settings.</span>
+            <div style="display:flex;gap:8px">
+              <sc-for list="{{pinDots}}" as="d" hint-placeholder-count="4">
+                <div style="width:14px;height:14px;border-radius:9999px;background:{{c.surfaceStrong}}"></div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="background:{{c.card}};border:1px solid {{c.hairline}};border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <span style="font-size:13px;font-weight:600;color:{{c.ink}}">View-only PIN</span>
+              <div onClick="{{toggleViewOnly}}" style="width:40px;height:22px;border-radius:100px;background:{{viewOnlyEnabled_bg}};position:relative;cursor:pointer">
+                <div style="width:16px;height:16px;border-radius:9999px;background:#fff;position:absolute;top:3px;left:{{viewOnlyEnabled_left}};transition:left 0.15s"></div>
+              </div>
+            </div>
+            <span style="font-size:12px;color:{{c.muted}}">Optional. Lets a trusted person view balances and history with no ability to edit, delete, back up, or change settings.</span>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{isHistory}}" hint-placeholder-val="{{false}}">
+        <div style="padding:4px 16px 24px;display:flex;flex-direction:column;gap:8px">
+          <sc-for list="{{historyRows}}" as="h" hint-placeholder-count="4">
+            <div style="background:{{c.card}};border:1px solid {{c.hairline}};border-radius:16px;padding:12px 14px;display:flex;flex-direction:column;gap:2px">
+              <span style="font-size:13px;color:{{c.ink}}">{{h.field}} changed: <b>{{h.from}}</b> → <b>{{h.to}}</b></span>
+              <span style="font-size:11px;color:{{c.muted}}">{{h.date}}</span>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{isBill}}" hint-placeholder-val="{{false}}">
+        <div style="padding:4px 16px 100px;display:flex;flex-direction:column;gap:16px">
+
+          <div style="display:flex;background:{{c.surfaceStrong}};border-radius:100px;padding:4px">
+            <sc-for list="{{billTypes}}" as="bt" hint-placeholder-count="3">
+              <div onClick="{{bt.select}}" style="{{bt.pillStyle}}">{{bt.label}}</div>
+            </sc-for>
+          </div>
+
+          <div style="background:{{c.card}};border:1px solid {{c.hairline}};border-radius:16px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between">
+            <div style="display:flex;flex-direction:column">
+              <span style="font-size:11px;color:{{c.muted}}">{{partyRoleLabel}}</span>
+              <span style="font-size:15px;font-weight:600;color:{{c.ink}}">{{selectedPartyName}}</span>
+            </div>
+            <span style="font-size:13px;color:{{c.primary}};font-weight:600">Change</span>
+          </div>
+
+          <sc-if value="{{showLineItems}}" hint-placeholder-val="{{true}}">
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <div style="display:flex;align-items:center;justify-content:space-between">
+                <span style="font-size:15px;font-weight:600;color:{{c.ink}}">Line items</span>
+                <div onClick="{{toggleRateMode}}" style="display:flex;align-items:center;gap:6px;font-size:12px;color:{{c.muted}};cursor:pointer">
+                  <span>Rate: {{rateModeLabel}}</span>
+                </div>
+              </div>
+
+              <sc-for list="{{lineItems}}" as="li" hint-placeholder-count="1">
+                <div style="background:{{c.card}};border:1px solid {{c.hairline}};border-radius:20px;padding:14px;display:flex;flex-direction:column;gap:10px">
+                  <div style="display:flex;gap:8px;flex-wrap:wrap">
+                    <sc-for list="{{li.categoryChips}}" as="ch" hint-placeholder-count="3">
+                      <div onClick="{{ch.select}}" style="{{ch.chipStyle}}">{{ch.label}}</div>
+                    </sc-for>
+                  </div>
+                  <input type="text" placeholder="Sub-category (optional)" value="{{li.sub}}" onChange="{{li.onSubChange}}" style="{{inputStyle}}" />
+                  <div style="display:flex;gap:8px">
+                    <div style="flex:1;display:flex;flex-direction:column;gap:4px">
+                      <span style="font-size:11px;color:{{c.muted}}">Weight (kg)</span>
+                      <input type="number" value="{{li.weight}}" onChange="{{li.onWeightChange}}" style="{{inputStyle}}" />
+                    </div>
+                    <sc-if value="{{li.showRate}}" hint-placeholder-val="{{true}}">
+                      <div style="flex:1;display:flex;flex-direction:column;gap:4px">
+                        <span style="font-size:11px;color:{{c.muted}}">Rate / kg</span>
+                        <input type="number" value="{{li.rate}}" onChange="{{li.onRateChange}}" style="{{inputStyle}}" />
+                      </div>
+                    </sc-if>
+                  </div>
+                  <div style="display:flex;align-items:center;justify-content:space-between;padding-top:2px">
+                    <span style="font-size:12px;color:{{c.muted}}">Line total</span>
+                    <div style="display:flex;align-items:center;gap:10px">
+                      <span style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;color:{{c.ink}}">{{li.totalFmt}}</span>
+                      <span onClick="{{li.remove}}" style="font-size:12px;color:{{c.semanticDown}};cursor:pointer">Remove</span>
+                    </div>
+                  </div>
+                </div>
+              </sc-for>
+
+              <div onClick="{{addLineItem}}" style="border:1px dashed {{c.hairline}};border-radius:16px;padding:12px;text-align:center;font-size:13px;color:{{c.primary}};font-weight:600;cursor:pointer">+ Add line item</div>
+              <sc-if value="{{showBillRate}}" hint-placeholder-val="{{false}}">
+                <div style="display:flex;flex-direction:column;gap:4px">
+                  <span style="font-size:11px;color:{{c.muted}}">Bill-level rate / kg</span>
+                  <input type="number" value="{{billRate}}" onChange="{{onBillRateChange}}" style="{{inputStyle}}" />
+                </div>
+              </sc-if>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{overstockCategory}}" hint-placeholder-val="{{false}}">
+            <div style="background:{{c.surfaceSoft}};border:1px solid {{c.hairline}};border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:10px">
+              <span style="font-size:13px;color:{{c.ink}};line-height:1.5">{{overstockMessage}}</span>
+              <div style="display:flex;gap:8px">
+                <div onClick="{{acknowledgeOverstock}}" style="flex:1;text-align:center;padding:10px;border-radius:100px;background:{{c.primary}};color:#fff;font-size:13px;font-weight:600;cursor:pointer">Continue Anyway</div>
+                <div onClick="{{fixOverstock}}" style="flex:1;text-align:center;padding:10px;border-radius:100px;background:{{c.surfaceStrong}};color:{{c.ink}};font-size:13px;font-weight:600;cursor:pointer">Cancel</div>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{isExpense}}" hint-placeholder-val="{{false}}">
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <span style="font-size:15px;font-weight:600;color:{{c.ink}}">Expense category</span>
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <sc-for list="{{expenseCategoryChips}}" as="ec" hint-placeholder-count="5">
+                  <div onClick="{{ec.select}}" style="{{ec.chipStyle}}">{{ec.label}}</div>
+                </sc-for>
+              </div>
+              <span style="font-size:11px;color:{{c.muted}}">Amount</span>
+              <input type="number" value="{{expenseAmount}}" onChange="{{onExpenseAmountChange}}" style="{{inputStyle}}" />
+            </div>
+          </sc-if>
+
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <span style="font-size:15px;font-weight:600;color:{{c.ink}}">{{paymentSectionLabel}}</span>
+            <div style="display:flex;gap:8px">
+              <sc-for list="{{poolChips}}" as="pc" hint-placeholder-count="3">
+                <div onClick="{{pc.select}}" style="{{pc.chipStyle}}">{{pc.label}}</div>
+              </sc-for>
+            </div>
+            <input type="number" placeholder="Amount" value="{{paymentAmount}}" onChange="{{onPaymentAmountChange}}" style="{{inputStyle}}" />
+          </div>
+
+          <div style="border:1px dashed {{c.hairline}};border-radius:16px;padding:12px;text-align:center;font-size:13px;color:{{c.muted}}">+ Attach photo (on-device only)</div>
+
+          <div style="text-align:center;padding:14px;border-radius:100px;background:{{c.primary}};color:#fff;font-size:14px;font-weight:600">Save bill</div>
+
+        </div>
+      </sc-if>
+
+    </div>
+
+    <div style="flex-shrink:0;background:{{c.canvas}};border-top:1px solid {{c.hairline}};display:flex;align-items:center;justify-content:space-around;padding:8px 12px 10px;position:relative">
+      <div onClick="{{goDashboard}}" style="display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer">
+        <div style="{{navDotStyle_dashboard}}"></div>
+        <span style="font-size:10px;font-weight:600;color:{{navColor_dashboard}}">Home</span>
+      </div>
+      <div onClick="{{goParties}}" style="display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer">
+        <div style="{{navDotStyle_parties}}"></div>
+        <span style="font-size:10px;font-weight:600;color:{{navColor_parties}}">Parties</span>
+      </div>
+      <div onClick="{{goBill}}" style="display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;margin-top:-22px">
+        <div style="width:48px;height:48px;border-radius:9999px;background:{{c.primary}};display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(0,82,255,0.35)">
+          <div style="width:16px;height:2px;background:#fff;position:relative">
+            <div style="width:2px;height:16px;background:#fff;position:absolute;left:7px;top:-7px"></div>
+          </div>
+        </div>
+        <span style="font-size:10px;font-weight:600;color:{{navColor_bill}}">New Bill</span>
+      </div>
+      <div onClick="{{goStock}}" style="display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer">
+        <div style="{{navDotStyle_stock}}"></div>
+        <span style="font-size:10px;font-weight:600;color:{{navColor_stock}}">Stock</span>
+      </div>
+      <div onClick="{{goMore}}" style="display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer">
+        <div style="{{navDotStyle_more}}"></div>
+        <span style="font-size:10px;font-weight:600;color:{{navColor_more}}">More</span>
+      </div>
+    </div>
+
+  </div>
+</x-import>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const CATS_INIT = [
+  { id: 'bura', name: 'Bura', qty: 3200, avgCost: 172, marginPct: 5, expanded: false, explainOpen: false, writeOffOpen: false, writeOffQty: '', writeOffMode: 'absorb',
+    subs: [{ name: 'Bura – A Grade', qty: 1900 }, { name: 'Bura – Mixed', qty: 1300 }],
+    ledger: [
+      { date: '12 May', type: 'Purchase', qty: 1200, rate: 168, balance: 1200 },
+      { date: '18 May', type: 'Sale', qty: -600, rate: 190, balance: 600 },
+      { date: '02 Jun', type: 'Purchase', qty: 2000, rate: 175, balance: 2600 },
+      { date: '20 Jun', type: 'Sale', qty: -400, rate: 198, balance: 2200 },
+      { date: '05 Jul', type: 'Purchase', qty: 1000, rate: 170, balance: 3200 },
+    ] },
+  { id: 'degi', name: 'Degi Bura', qty: 1450, avgCost: 205, marginPct: 6, expanded: false, explainOpen: false, writeOffOpen: false, writeOffQty: '', writeOffMode: 'absorb',
+    subs: [{ name: 'Degi Bura – Sorted', qty: 970 }, { name: 'Degi Bura – Raw', qty: 480 }],
+    ledger: [
+      { date: '15 May', type: 'Purchase', qty: 1000, rate: 200, balance: 1000 },
+      { date: '01 Jun', type: 'Write-off', qty: -30, rate: 0, balance: 970 },
+      { date: '10 Jun', type: 'Purchase', qty: 480, rate: 212, balance: 1450 },
+    ] },
+  { id: 'scrap', name: 'Scrap', qty: 640, avgCost: 96, marginPct: 8, expanded: false, explainOpen: false, writeOffOpen: false, writeOffQty: '', writeOffMode: 'absorb',
+    subs: [{ name: 'Scrap – Pipe', qty: 210 }, { name: 'Scrap – Sheet', qty: 430 }],
+    ledger: [
+      { date: '20 May', type: 'Purchase', qty: 900, rate: 90, balance: 900 },
+      { date: '30 Jun', type: 'Sale', qty: -260, rate: 108, balance: 640 },
+    ] },
+];
+
+const EXPENSE_CATS = ['Salaries', 'Food', 'Electricity', 'Rent', 'Other'];
+
+const PARTIES_INIT = [
+  { id: 'imran', name: 'Imran Traders', type: 'buyer', phone: '0300-1234567', balance: 340000, advance: 0,
+    bills: [{ typeLabel: 'Sale', date: '18 Jun', amount: 380000 }, { typeLabel: 'Sale', date: '02 Jul', amount: 130000 }],
+    payments: [{ id: 'p1', date: '20 Jun', amount: 170000, pool: 'Bank', reversed: false }] },
+  { id: 'chaudhry', name: 'Chaudhry Metals', type: 'supplier', phone: '0321-9988776', balance: -172000, advance: 0,
+    bills: [{ typeLabel: 'Purchase', date: '05 Jul', amount: 210000 }],
+    payments: [{ id: 'p2', date: '08 Jul', amount: 38000, pool: 'Home', reversed: false }] },
+  { id: 'akram', name: 'Akram Bhai', type: 'buyer', phone: '0333-4455667', balance: 272000, advance: 15000,
+    bills: [{ typeLabel: 'Sale', date: '22 Jun', amount: 287000 }],
+    payments: [{ id: 'p3', date: '01 Jul', amount: 30000, pool: 'Bank', reversed: true, reversedDate: '03 Jul', reversedNote: 'Cheque bounced' }] },
+  { id: 'sarwar', name: 'Sarwar Suppliers', type: 'supplier', phone: '0345-1122334', balance: -64000, advance: 0,
+    bills: [{ typeLabel: 'Purchase', date: '29 Jun', amount: 96000 }],
+    payments: [{ id: 'p4', date: '30 Jun', amount: 32000, pool: 'Godam', reversed: false }] },
+];
+
+const TRASH_INIT = [
+  { id: 't1', name: 'Duplicate bill — Imran Traders', typeLabel: 'Bill', deletedDate: '10 Jul', daysRemaining: 24 },
+  { id: 't2', name: 'Test party', typeLabel: 'Party', deletedDate: '02 Jul', daysRemaining: 16 },
+];
+
+const HISTORY_INIT = [
+  { field: 'Balance', from: 'Rs. 310,000', to: 'Rs. 340,000', date: '02 Jul, 4:12 PM' },
+  { field: 'Phone', from: '0300-0000000', to: '0300-1234567', date: '18 Jun, 11:03 AM' },
+];
+
+class Component extends DCLogic {
+  state = {
+    theme: 'light',
+    screen: 'dashboard',
+    prevScreen: 'dashboard',
+    selectedMonth: 5,
+    categories: CATS_INIT,
+    parties: PARTIES_INIT,
+    partyFilter: 'all',
+    selectedPartyId: null,
+    partyDetailTab: 'bills',
+    ledgerCategoryId: null,
+    trash: TRASH_INIT,
+    viewOnlyEnabled: true,
+    transferFormOpen: false,
+    transferFrom: 'home',
+    transferAmount: '',
+    godamTraceOpenId: null,
+    billType: 'purchase',
+    rateMode: 'line',
+    partyName: 'Imran Traders',
+    lineItems: [{ id: 1, category: 'bura', sub: '', weight: 500, rate: 175 }],
+    billRate: 175,
+    expenseCategory: 'Salaries',
+    expenseAmount: 12000,
+    paymentAmount: 0,
+    paymentPool: 'bank',
+    overstockAcknowledged: false,
+    nextLineId: 2,
+  };
+
+  fmt(n) {
+    const r = Math.round(n);
+    const neg = r < 0;
+    const s = 'Rs. ' + Math.abs(r).toLocaleString('en-US');
+    return neg ? '-' + s : s;
+  }
+
+  colors() {
+    const dark = this.state.theme === 'dark';
+    return dark ? {
+      canvas: '#0a0b0d', card: '#16181c', surfaceSoft: '#16181c', surfaceStrong: '#1f2227',
+      surfaceDark: '#000000', surfaceDarkElevated: '#1f2227',
+      ink: '#ffffff', body: '#a8acb3', muted: '#7c828a',
+      hairline: '#2a2d33', hairlineSoft: '#22252b',
+      onDarkSoft: '#a8acb3', primary: '#3d7bff', primaryActive: '#003ecc',
+      semanticUp: '#2fd88a', semanticDown: '#ff5f6d',
+    } : {
+      canvas: '#ffffff', card: '#ffffff', surfaceSoft: '#f7f7f7', surfaceStrong: '#eef0f3',
+      surfaceDark: '#0a0b0d', surfaceDarkElevated: '#16181c',
+      ink: '#0a0b0d', body: '#5b616e', muted: '#7c828a',
+      hairline: '#dee1e6', hairlineSoft: '#eef0f3',
+      onDarkSoft: '#a8acb3', primary: '#0052ff', primaryActive: '#003ecc',
+      semanticUp: '#05b169', semanticDown: '#cf202f',
+    };
+  }
+
+  toggleTheme = () => this.setState(s => ({ theme: s.theme === 'light' ? 'dark' : 'light' }));
+
+  nav(screen, extra) { this.setState(s => ({ screen, prevScreen: s.screen, ...(extra || {}) })); }
+
+  monthly() {
+    return [
+      { label: 'Feb', profit: 210000 }, { label: 'Mar', profit: 185000 }, { label: 'Apr', profit: -40000 },
+      { label: 'May', profit: 265000 }, { label: 'Jun', profit: 302000 }, { label: 'Jul', profit: 248000 },
+    ];
+  }
+
+  categoriesWithComputed(c) {
+    return this.state.categories.map(cat => {
+      const recRate = cat.avgCost * (1 + cat.marginPct / 100);
+      let bal = 0;
+      const ledger = (cat.ledger || []).map(r => {
+        bal += r.qty;
+        return { ...r, label: r.type, qtyFmt: (r.qty >= 0 ? '+' : '') + r.qty.toLocaleString('en-US') + ' kg', color: r.qty >= 0 ? c.semanticUp : c.semanticDown, balanceFmt: bal.toLocaleString('en-US') + ' kg' };
+      });
+      return {
+        ...cat,
+        qtyFmt: cat.qty.toLocaleString('en-US') + ' kg',
+        avgCostKgFmt: this.fmt(cat.avgCost),
+        stockValueFmt: this.fmt(cat.qty * cat.avgCost),
+        recRateFmt: this.fmt(recRate) + '/kg',
+        expandLabel: cat.expanded ? 'Hide' : 'Show',
+        subs: cat.subs.map(s => ({ ...s, qtyFmt: s.qty.toLocaleString('en-US') + ' kg' })),
+        ledgerComputed: ledger,
+        absorbPillStyle: `flex:1;text-align:center;padding:8px;border-radius:100px;font-size:11px;font-weight:600;cursor:pointer;background:${cat.writeOffMode === 'absorb' ? c.primary : c.surfaceStrong};color:${cat.writeOffMode === 'absorb' ? '#fff' : c.ink}`,
+        expensePillStyle: `flex:1;text-align:center;padding:8px;border-radius:100px;font-size:11px;font-weight:600;cursor:pointer;background:${cat.writeOffMode === 'expense' ? c.primary : c.surfaceStrong};color:${cat.writeOffMode === 'expense' ? '#fff' : c.ink}`,
+        toggleExpand: () => this.setState(s => ({ categories: s.categories.map(x => x.id === cat.id ? { ...x, expanded: !x.expanded } : x) })),
+        toggleExplain: () => this.setState(s => ({ categories: s.categories.map(x => x.id === cat.id ? { ...x, explainOpen: !x.explainOpen } : x) })),
+        incMargin: (e) => { e.stopPropagation(); this.setState(s => ({ categories: s.categories.map(x => x.id === cat.id ? { ...x, marginPct: Math.min(50, x.marginPct + 1) } : x) })); },
+        decMargin: (e) => { e.stopPropagation(); this.setState(s => ({ categories: s.categories.map(x => x.id === cat.id ? { ...x, marginPct: Math.max(0, x.marginPct - 1) } : x) })); },
+        viewLedger: () => this.nav('stockLedger', { ledgerCategoryId: cat.id }),
+        writeOff: () => this.setState(s => ({ categories: s.categories.map(x => x.id === cat.id ? { ...x, writeOffOpen: !x.writeOffOpen } : x) })),
+        onWriteOffQtyChange: (e) => { const v = e.target.value; this.setState(s => ({ categories: s.categories.map(x => x.id === cat.id ? { ...x, writeOffQty: v } : x) })); },
+        setAbsorb: () => this.setState(s => ({ categories: s.categories.map(x => x.id === cat.id ? { ...x, writeOffMode: 'absorb' } : x) })),
+        setExpense: () => this.setState(s => ({ categories: s.categories.map(x => x.id === cat.id ? { ...x, writeOffMode: 'expense' } : x) })),
+        confirmWriteOff: () => this.setState(s => ({ categories: s.categories.map(x => {
+          if (x.id !== cat.id) return x;
+          const q = Number(x.writeOffQty) || 0;
+          const newQty = Math.max(0, x.qty - q);
+          const newAvg = x.writeOffMode === 'absorb' && newQty > 0 ? (x.avgCost * x.qty) / newQty : x.avgCost;
+          return { ...x, qty: newQty, avgCost: newAvg, writeOffOpen: false, writeOffQty: '' };
+        }) })),
+      };
+    });
+  }
+
+  lineTotal(li) {
+    const rate = this.state.rateMode === 'bill' ? this.state.billRate : li.rate;
+    return (Number(li.weight) || 0) * (Number(rate) || 0);
+  }
+
+  overstock(c) {
+    if (this.state.billType !== 'sale' || this.state.overstockAcknowledged) return null;
+    for (const cat of this.state.categories) {
+      const soldWeight = this.state.lineItems.filter(li => li.category === cat.id).reduce((a, li) => a + (Number(li.weight) || 0), 0);
+      const remaining = cat.qty - soldWeight;
+      if (remaining < 0) return { cat, remaining };
+    }
+    return null;
+  }
+
+  partiesComputed(c) {
+    return this.state.parties.map(p => {
+      const isPositive = p.balance >= 0;
+      return {
+        ...p,
+        initial: p.name[0],
+        typeLabel: p.type === 'buyer' ? 'Buyer' : p.type === 'supplier' ? 'Supplier' : 'Buyer & Supplier',
+        color: isPositive ? c.semanticUp : c.semanticDown,
+        amountFmt: this.fmt(p.balance),
+        open: () => this.nav('partyDetail', { selectedPartyId: p.id, partyDetailTab: 'bills' }),
+      };
+    });
+  }
+
+  renderVals() {
+    const c = this.colors();
+    const isDark = this.state.theme === 'dark';
+    const cashHome = 128000, cashBank = 540000, cashGodam = 76000;
+    const cashTotal = cashHome + cashBank + cashGodam;
+    const stockValue = this.state.categories.reduce((a, cat) => a + cat.qty * cat.avgCost, 0);
+    const partiesComputed = this.partiesComputed(c);
+    const receivables = partiesComputed.filter(p => p.balance > 0).reduce((a, p) => a + p.balance, 0);
+    const payables = partiesComputed.filter(p => p.balance < 0).reduce((a, p) => a - p.balance, 0);
+    const netWorth = cashTotal + receivables - payables + stockValue;
+
+    const monthly = this.monthly();
+    const maxAbs = Math.max(...monthly.map(m => Math.abs(m.profit)));
+    const monthlyBars = monthly.map((m, i) => {
+      const sel = i === this.state.selectedMonth;
+      const h = Math.max(6, (Math.abs(m.profit) / maxAbs) * 84);
+      return {
+        label: m.label,
+        select: () => this.setState({ selectedMonth: i }),
+        labelColor: sel ? c.ink : c.muted,
+        labelWeight: sel ? 700 : 400,
+        barStyle: `width:100%;height:${h}px;border-radius:6px;background:${m.profit >= 0 ? (sel ? c.primary : c.surfaceStrong) : (sel ? c.semanticDown : c.surfaceStrong)}`,
+      };
+    });
+    const selMonth = monthly[this.state.selectedMonth];
+
+    const topParties = [...partiesComputed].sort((a, b) => Math.abs(b.balance) - Math.abs(a.balance)).slice(0, 3)
+      .map(p => ({ ...p, role: p.balance >= 0 ? `${p.typeLabel} · owes us` : `${p.typeLabel} · we owe` }));
+
+    const categories = this.categoriesWithComputed(c);
+
+    const billTypes = ['purchase', 'sale', 'expense'].map(t => ({
+      label: t[0].toUpperCase() + t.slice(1),
+      select: () => this.setState(s => {
+        const defaults = t === 'purchase'
+          ? [{ id: 1, category: 'bura', sub: '', weight: 500, rate: 175 }]
+          : t === 'sale'
+          ? [{ id: 1, category: 'scrap', sub: '', weight: 700, rate: 110 }]
+          : [];
+        return { billType: t, lineItems: defaults, overstockAcknowledged: false, nextLineId: 2 };
+      }),
+      pillStyle: `flex:1;text-align:center;padding:9px 0;border-radius:100px;font-size:13px;font-weight:600;cursor:pointer;background:${this.state.billType === t ? c.primary : 'transparent'};color:${this.state.billType === t ? '#fff' : c.body}`,
+    }));
+
+    const catList = [{ id: 'bura', name: 'Bura' }, { id: 'degi', name: 'Degi Bura' }, { id: 'scrap', name: 'Scrap' }];
+    const lineItems = this.state.lineItems.map(li => ({
+      id: li.id,
+      sub: li.sub,
+      weight: li.weight,
+      rate: li.rate,
+      showRate: this.state.rateMode === 'line',
+      totalFmt: this.fmt(this.lineTotal(li)),
+      categoryChips: catList.map(cat => ({
+        label: cat.name,
+        select: () => this.setState(s => ({ lineItems: s.lineItems.map(x => x.id === li.id ? { ...x, category: cat.id } : x) })),
+        chipStyle: `padding:6px 12px;border-radius:100px;font-size:12px;font-weight:600;cursor:pointer;background:${li.category === cat.id ? c.primary : c.surfaceStrong};color:${li.category === cat.id ? '#fff' : c.ink}`,
+      })),
+      onSubChange: (e) => this.setState(s => ({ lineItems: s.lineItems.map(x => x.id === li.id ? { ...x, sub: e.target.value } : x) })),
+      onWeightChange: (e) => this.setState(s => ({ lineItems: s.lineItems.map(x => x.id === li.id ? { ...x, weight: e.target.value } : x), overstockAcknowledged: false })),
+      onRateChange: (e) => this.setState(s => ({ lineItems: s.lineItems.map(x => x.id === li.id ? { ...x, rate: e.target.value } : x) })),
+      remove: () => this.setState(s => ({ lineItems: s.lineItems.filter(x => x.id !== li.id) })),
+    }));
+
+    const overstockInfo = this.overstock(c);
+    const inputStyle = `width:100%;padding:11px 13px;border-radius:12px;border:1px solid ${c.hairline};background:${c.canvas};color:${c.ink};font-size:14px;font-family:Inter,sans-serif;outline:none`;
+
+    const expenseCategoryChips = EXPENSE_CATS.map(ec => ({
+      label: ec,
+      select: () => this.setState({ expenseCategory: ec }),
+      chipStyle: `padding:7px 14px;border-radius:100px;font-size:12px;font-weight:600;cursor:pointer;background:${this.state.expenseCategory === ec ? c.primary : c.surfaceStrong};color:${this.state.expenseCategory === ec ? '#fff' : c.ink}`,
+    }));
+
+    const poolChips = [{ id: 'home', label: 'Home' }, { id: 'bank', label: 'Bank' }, { id: 'godam', label: 'Godam' }].map(p => ({
+      label: p.label,
+      select: () => this.setState({ paymentPool: p.id }),
+      chipStyle: `flex:1;text-align:center;padding:9px 0;border-radius:100px;font-size:13px;font-weight:600;cursor:pointer;background:${this.state.paymentPool === p.id ? c.surfaceDark : c.surfaceStrong};color:${this.state.paymentPool === p.id ? '#fff' : c.ink}`,
+    }));
+
+    const rootTabs = ['dashboard', 'parties', 'stock', 'more'];
+    const navColor = (tab) => (this.state.screen === tab || (tab === 'stock' && this.state.screen === 'stockLedger') || (tab === 'parties' && this.state.screen === 'partyDetail')) ? c.primary : c.muted;
+    const navDot = (tab) => {
+      const active = this.state.screen === tab || (tab === 'stock' && this.state.screen === 'stockLedger') || (tab === 'parties' && this.state.screen === 'partyDetail');
+      return `width:22px;height:22px;border-radius:9999px;border:2px solid ${active ? c.primary : c.muted};background:${active ? c.primary : 'transparent'}`;
+    };
+
+    // parties list
+    const partyFilters = [{ id: 'all', label: 'All' }, { id: 'supplier', label: 'Suppliers' }, { id: 'buyer', label: 'Buyers' }].map(f => ({
+      label: f.label,
+      select: () => this.setState({ partyFilter: f.id }),
+      pillStyle: `flex:1;text-align:center;padding:9px 0;border-radius:100px;font-size:13px;font-weight:600;cursor:pointer;background:${this.state.partyFilter === f.id ? c.primary : 'transparent'};color:${this.state.partyFilter === f.id ? '#fff' : c.body}`,
+    }));
+    const filteredParties = partiesComputed.filter(p => this.state.partyFilter === 'all' || p.type === this.state.partyFilter);
+
+    // party detail
+    const selectedPartyRaw = this.state.parties.find(p => p.id === this.state.selectedPartyId) || this.state.parties[0];
+    const spPositive = selectedPartyRaw.balance >= 0;
+    const selectedParty = {
+      ...selectedPartyRaw,
+      typeLabel: selectedPartyRaw.type === 'buyer' ? 'Buyer' : 'Supplier',
+      balanceLabel: spPositive ? 'Owes us' : 'We owe',
+      color: spPositive ? c.semanticUp : c.semanticDown,
+      amountFmt: this.fmt(Math.abs(selectedPartyRaw.balance)),
+      hasAdvance: selectedPartyRaw.advance > 0,
+      advanceFmt: this.fmt(selectedPartyRaw.advance),
+      bills: selectedPartyRaw.bills.map(b => ({ ...b, amountFmt: this.fmt(b.amount) })),
+      payments: selectedPartyRaw.payments.map(pay => ({
+        ...pay,
+        amountFmt: this.fmt(pay.amount),
+        isReversed: pay.reversed,
+        canReverse: !pay.reversed,
+        reverse: () => this.setState(s => ({ parties: s.parties.map(p => p.id === selectedPartyRaw.id ? { ...p, payments: p.payments.map(x => x.id === pay.id ? { ...x, reversed: true, reversedDate: 'today', reversedNote: 'Manually reversed' } : x) } : p) })),
+      })),
+    };
+    const partyDetailTabs = [{ id: 'bills', label: 'Bills' }, { id: 'payments', label: 'Payments' }].map(t => ({
+      label: t.label,
+      select: () => this.setState({ partyDetailTab: t.id }),
+      pillStyle: `flex:1;text-align:center;padding:9px 0;border-radius:100px;font-size:13px;font-weight:600;cursor:pointer;background:${this.state.partyDetailTab === t.id ? c.primary : 'transparent'};color:${this.state.partyDetailTab === t.id ? '#fff' : c.body}`,
+    }));
+
+    // stock ledger
+    const ledgerCat = categories.find(cat => cat.id === this.state.ledgerCategoryId) || categories[0];
+    const ledgerRows = ledgerCat ? ledgerCat.ledgerComputed : [];
+
+    // cash & godam
+    const cashPoolCards = [{ label: 'Home', v: cashHome }, { label: 'Bank', v: cashBank }, { label: 'Godam', v: cashGodam }].map(p => ({ label: p.label, amountFmt: this.fmt(p.v) }));
+    const transferFromChips = [{ id: 'home', label: 'From Home' }, { id: 'bank', label: 'From Bank' }].map(t => ({
+      label: t.label,
+      select: () => this.setState({ transferFrom: t.id }),
+      chipStyle: `flex:1;text-align:center;padding:9px 0;border-radius:100px;font-size:13px;font-weight:600;cursor:pointer;background:${this.state.transferFrom === t.id ? c.surfaceDark : c.surfaceStrong};color:${this.state.transferFrom === t.id ? '#fff' : c.ink}`,
+    }));
+    const godamLedgerData = [
+      { id: 'g1', label: 'Transfer in from Bank', date: '01 Jul', amount: 100000, balance: 100000, isSpend: false },
+      { id: 'g2', label: 'Spend — Chaudhry Metals purchase', date: '05 Jul', amount: -60000, balance: 40000, isSpend: true, trace: 'Funded by the Rs. 100,000 transfer from Bank on 01 Jul.' },
+      { id: 'g3', label: 'Transfer in from Home', date: '10 Jul', amount: 40000, balance: 80000, isSpend: false },
+      { id: 'g4', label: 'Spend — Godam expense (labor)', date: '15 Jul', amount: -4000, balance: 76000, isSpend: true, trace: 'Funded by the remaining Rs. 40,000 from the 01 Jul Bank transfer.' },
+    ];
+    const godamLedger = godamLedgerData.map(g => ({
+      label: g.label, date: g.date,
+      amountFmt: (g.amount >= 0 ? '+' : '') + this.fmt(g.amount),
+      color: g.amount >= 0 ? c.semanticUp : c.ink,
+      balanceFmt: this.fmt(g.balance),
+      traceOpen: this.state.godamTraceOpenId === g.id,
+      traceText: g.trace || '',
+      toggle: g.isSpend ? () => this.setState(s => ({ godamTraceOpenId: s.godamTraceOpenId === g.id ? null : g.id })) : () => {},
+    }));
+
+    // more / settings
+    const moreRows = [
+      { label: 'Cash & Godam', sub: 'Pools, transfers, FIFO trace', open: () => this.nav('cash') },
+      { label: 'PIN & view-only access', sub: 'Admin PIN, optional view-only PIN', open: () => this.nav('pin') },
+      { label: 'Backup & restore', sub: 'Last backup, restore on new device', open: () => this.nav('backup') },
+      { label: 'Trash', sub: `${this.state.trash.length} items · 30-day recovery`, open: () => this.nav('trash') },
+      { label: 'Theme', sub: this.state.theme === 'dark' ? 'Dark' : 'Light', open: () => {} },
+      { label: 'About Godam Ledger', sub: 'v1.0 · offline-first', open: () => {} },
+    ];
+
+    const trashItems = this.state.trash.map(t => ({ ...t }));
+    const historyRows = HISTORY_INIT;
+
+    // screen title / back logic
+    const titles = { partyDetail: selectedParty.name, stockLedger: (ledgerCat ? ledgerCat.name : '') + ' ledger', cash: 'Cash & Godam', trash: 'Trash', backup: 'Backup & Restore', pin: 'PIN & Access', history: 'Update history' };
+    const rootScreens = ['dashboard', 'parties', 'stock', 'bill', 'more'];
+    const isRoot = rootScreens.includes(this.state.screen);
+
+    return {
+      c, isDark,
+      toggleTheme: this.toggleTheme,
+      themeDotStyle: `width:20px;height:20px;border-radius:9999px;background:${c.primary};position:absolute;top:4px;left:${isDark ? '28px' : '4px'};transition:left 0.15s`,
+      showLogo: isRoot,
+      showBack: !isRoot,
+      screenTitle: titles[this.state.screen] || '',
+      goBack: () => this.setState(s => ({ screen: s.prevScreen === s.screen ? 'dashboard' : (rootScreens.includes(s.prevScreen) ? s.prevScreen : 'dashboard') })),
+
+      isDashboard: this.state.screen === 'dashboard',
+      isParties: this.state.screen === 'parties',
+      isPartyDetail: this.state.screen === 'partyDetail',
+      isStock: this.state.screen === 'stock',
+      isStockLedger: this.state.screen === 'stockLedger',
+      isCash: this.state.screen === 'cash',
+      isMore: this.state.screen === 'more',
+      isTrash: this.state.screen === 'trash',
+      isBackup: this.state.screen === 'backup',
+      isPin: this.state.screen === 'pin',
+      isHistory: this.state.screen === 'history',
+      isBill: this.state.screen === 'bill',
+
+      goDashboard: () => this.nav('dashboard'),
+      goParties: () => this.nav('parties'),
+      goStock: () => this.nav('stock'),
+      goBill: () => this.nav('bill'),
+      goMore: () => this.nav('more'),
+      goCash: () => this.nav('cash'),
+      openHistory: () => this.nav('history'),
+
+      navColor_dashboard: navColor('dashboard'), navColor_parties: navColor('parties'), navColor_stock: navColor('stock'), navColor_bill: navColor('bill'), navColor_more: navColor('more'),
+      navDotStyle_dashboard: navDot('dashboard'), navDotStyle_parties: navDot('parties'), navDotStyle_stock: navDot('stock'), navDotStyle_more: navDot('more'),
+
+      netWorthFmt: this.fmt(netWorth),
+      cashTotalFmt: this.fmt(cashTotal),
+      stockValueFmt: this.fmt(stockValue),
+      netPartyFmt: this.fmt(receivables - payables),
+      cashHomeFmt: this.fmt(cashHome), cashBankFmt: this.fmt(cashBank), cashGodamFmt: this.fmt(cashGodam),
+      monthlyBars,
+      selectedMonthFmt: this.fmt(selMonth.profit) + ` (${selMonth.label})`,
+      selectedMonthColor: selMonth.profit >= 0 ? c.semanticUp : c.semanticDown,
+      topParties,
+      takeawayText: `Scrap carried the best margin this month; Bura was the weakest. Salaries was the single biggest expense. Imran Traders holds the largest outstanding balance owed to you, at ${this.fmt(340000)}.`,
+
+      categories,
+
+      totalReceivableFmt: this.fmt(receivables),
+      totalPayableFmt: this.fmt(payables),
+      partyFilters, filteredParties,
+
+      selectedParty, partyDetailTabs,
+      showPartyBills: this.state.partyDetailTab === 'bills',
+      showPartyPayments: this.state.partyDetailTab === 'payments',
+
+      ledgerCategoryName: ledgerCat ? ledgerCat.name : '',
+      ledgerRows,
+
+      cashPoolCards,
+      reconciliationText: `Home + Bank + Godam = ${this.fmt(cashTotal)}, matches dashboard net worth cash figure.`,
+      toggleTransferForm: () => this.setState(s => ({ transferFormOpen: !s.transferFormOpen })),
+      transferFormOpen: this.state.transferFormOpen,
+      transferFromChips,
+      transferAmount: this.state.transferAmount,
+      onTransferAmountChange: (e) => this.setState({ transferAmount: e.target.value }),
+      confirmTransfer: () => this.setState({ transferFormOpen: false, transferAmount: '' }),
+      overdraftWarning: false,
+      godamLedger,
+
+      moreRows, trashItems, historyRows,
+
+      viewOnlyEnabled_bg: this.state.viewOnlyEnabled ? c.primary : c.surfaceStrong,
+      viewOnlyEnabled_left: this.state.viewOnlyEnabled ? '21px' : '3px',
+      toggleViewOnly: () => this.setState(s => ({ viewOnlyEnabled: !s.viewOnlyEnabled })),
+      pinDots: [1, 2, 3, 4],
+
+      billTypes,
+      isExpense: this.state.billType === 'expense',
+      showLineItems: this.state.billType !== 'expense',
+      showBillRate: this.state.rateMode === 'bill' && this.state.billType !== 'expense',
+      partyRoleLabel: this.state.billType === 'purchase' ? 'Supplier' : this.state.billType === 'sale' ? 'Buyer' : 'Payee',
+      selectedPartyName: this.state.billType === 'expense' ? this.state.expenseCategory : this.state.partyName,
+      lineItems,
+      toggleRateMode: () => this.setState(s => ({ rateMode: s.rateMode === 'line' ? 'bill' : 'line' })),
+      rateModeLabel: this.state.rateMode === 'line' ? 'per line' : 'per bill',
+      billRate: this.state.billRate,
+      onBillRateChange: (e) => this.setState({ billRate: e.target.value }),
+      addLineItem: () => this.setState(s => ({ lineItems: [...s.lineItems, { id: s.nextLineId, category: 'bura', sub: '', weight: '', rate: '' }], nextLineId: s.nextLineId + 1 })),
+      inputStyle,
+
+      overstockCategory: !!overstockInfo,
+      overstockMessage: overstockInfo ? `This will put ${overstockInfo.cat.name} stock at ${overstockInfo.remaining.toLocaleString('en-US')} kg — continue?` : '',
+      acknowledgeOverstock: () => this.setState({ overstockAcknowledged: true }),
+      fixOverstock: () => this.setState(s => ({
+        lineItems: s.lineItems.map(li => {
+          if (!overstockInfo || li.category !== overstockInfo.cat.id) return li;
+          return { ...li, weight: overstockInfo.cat.qty };
+        }),
+      })),
+
+      expenseCategoryChips,
+      expenseAmount: this.state.expenseAmount,
+      onExpenseAmountChange: (e) => this.setState({ expenseAmount: e.target.value }),
+
+      paymentSectionLabel: this.state.billType === 'sale' ? 'Payment received' : this.state.billType === 'purchase' ? 'Advance paid' : 'Paid from',
+      poolChips,
+      paymentAmount: this.state.paymentAmount,
+      onPaymentAmountChange: (e) => this.setState({ paymentAmount: e.target.value }),
+    };
+  }
+}
+</script>
+</body>
+</html>
