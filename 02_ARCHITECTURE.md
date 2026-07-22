@@ -1,5 +1,27 @@
 # Architecture
 
+> **Implementation status (2026-07-22)** — layers built: `core/`, `data/local/`
+> (Drift schema + AppDatabase + vaulting), `domain/` (services + all use-cases),
+> `security/`, and the start of `presentation/` + `app/` (theme, Riverpod DI,
+> Dashboard). **Documented deviations from this doc's §6, all deliberate:**
+> - **StockCategory** stores `quantityGrams` + **`totalCostBasisPaisa`** (both int),
+>   NOT an `avgCostPaisaPerGram` column. avgCost is *derived* on read — a per-gram
+>   average isn't integer-exact for common rates (Rs 55/kg = 5.5 p/g), and floats
+>   are forbidden. This keeps the moving-average invariant provably exact.
+> - **Rates** are stored as **`ratePaisaPerKg`** (int), not per-gram, for the same
+>   integer-exactness reason. Money totals are the rounded Paisa value.
+> - **Bill** gained an **`isOpening`** boolean so Day-0 opening bills seed standing
+>   balances but are excluded from period P&L.
+> - **Repository layer is deferred.** Use-cases currently run their single
+>   transaction against `AppDatabase` directly (math still flows through the pure
+>   services; the one-txn invariant holds). Thin repos can wrap later.
+> - Soft-delete + restore for Bills/Parties is built as `manage_trash.dart`
+>   (`TrashService`); a bill delete/restore keeps stored stock exact by replaying
+>   the surviving ledger (`data/local/stock_rebuild.dart`), not by inverting the
+>   moving-average. The **sync layer** (Supabase backup/restore) is still not built.
+> - Phase-2 presentation layer is built and green (see `CLAUDE.md`); read models
+>   live in `data/local/read_queries.dart` + `app/read_providers.dart`.
+
 ## 1. App Flow (User-Level)
 
 ```

@@ -2,7 +2,15 @@
 
 Ordering principle: **correctness of the financial core before UI breadth, and domain-layer tests before screens.** Each phase should end with something genuinely verifiable against a real numeric example from the owner's actual business, not just "tests green."
 
-## Phase 0 — Foundation & Schema Lock
+> **Implementation status (as of 2026-07-22)** — 53 tests green, `flutter analyze lib test` clean.
+> - **Phase 0 — ✅ DONE** (except CI wiring + the deliberate forced-migration-failure drill).
+> - **Phase 1 — ✅ DONE.** All services + all use-cases + dashboard summary built and unit/integration-tested, including a hand-traced day-0-plus-a-month scenario where net worth grows by exactly the period profit.
+> - **Phase 2 — ✅ DONE (daily-use core usable end-to-end).** Onboarding + PIN lock + View-mode + Day-0 wizard, Parties (list/detail/settlement/edit-with-UpdateHistory), New Bill (Purchase/Sale/Expense, per-bill/per-line rate, inline sub-category + custom parent category, soft stock/overdraft warnings), Bills list + Pending filter, Bill detail + branded-image receipt share, Stock (cards, recommended-rate explainer, ledger drill-down + sub-tag filter, write-off), and Trash (soft-delete + restore, ledger-replay stock rebuild). Deferred to their own phases: standalone Payment recording + manual allocation UI, Payment Reversal UI, and in-place bill *field* editing (all Phase 3 / later — bills carry inline payments today, and a mistaken bill is corrected via Trash+re-enter). Fonts still fall back until TTFs are bundled.
+> - **Phases 3–6 — ⬜ NOT STARTED** (most Phase-3 use-cases already exist from Phase 1).
+>
+> See `05_MEMORY.md` Update Log for the running detail and the documented schema deviations.
+
+## Phase 0 — Foundation & Schema Lock — ✅ DONE (CI + forced-migration drill outstanding)
 **Goal**: Nothing built on top of a shaky schema.
 - Review `06_DESIGN_SYSTEM.md` and the validated HTML prototype (`Godam_Ledger_dc.html`) alongside this schema — confirm every data field the design references (e.g. net worth, cash pool chips, party balance colors) has a clear source in the schema below before writing use-case code.
 - Finalize schema per Architecture doc §6 (Party, StockCategory, Bill, BillLineItem, Payment, PaymentAllocation, CashPool, CashMovement, ExpenseCategory, StockWriteOff, UpdateHistory, TrashRecord, DayZeroMigration) — **UUIDv4 keys throughout, integer Paisa/Grams for all currency/weight fields, no `double`/`float` anywhere in the schema.**
@@ -11,7 +19,7 @@ Ordering principle: **correctness of the financial core before UI breadth, and d
 - Set up CI (analyze → test → build) reusing existing GitHub Actions config.
 - **Exit criteria**: schema reviewed against every scenario in PRD §3 (multi-line-item bill, moving average with zero-stock reset, parent-vs-subcategory costing, many-to-many payment, Godam FIFO, wastage write-off, payment reversal, cash overdraft) and confirmed each is representable — on paper/in a design doc — before writing use-case code. A deliberate migration-failure drill (force an `onUpgrade` to throw) confirms the vault-and-restore path actually works before Phase 1 starts.
 
-## Phase 1 — Domain Core (the part that must be correct)
+## Phase 1 — Domain Core (the part that must be correct) — ✅ DONE
 **Goal**: The financial logic exists and is proven correct in isolation, with zero UI.
 - `stock_costing_service.dart`: moving-average purchase/sale logic, **including the zero/negative-stock reset rule** and strict parent-category-only quantity/cost (sub-category tags never carry their own ledger).
 - `ledger_service.dart`: party balance derivation from bills + payment allocations, including reversed-payment handling.
@@ -22,8 +30,9 @@ Ordering principle: **correctness of the financial core before UI breadth, and d
 - **Tests**: unit tests covering the exact worked examples in the PRD (100kg scrap split into sub-categories, confirming sub-category tags don't fragment the parent's stock; a purchase-then-sell-to-zero-then-purchase-again sequence verifying the reset rule fires correctly; a payment split across 2 bills; an advance-allocation-to-new-bill confirmed to NOT create a duplicate CashMovement; a Godam spend traced to 2 separate transfers-in via the dynamic FIFO calc; a wastage write-off in both absorb and expense modes; a full payment reversal restoring a bill to open status without deleting the original payment row; a cash withdrawal that triggers the overdraft warning).
 - **Exit criteria**: hand-trace one full real day of business (owner provides real numbers from his manual register) through these use-cases and get matching numbers. This is the actual bar — not "tests pass," but "matches what the owner would have written by hand." All integer-storage (Paisa/Grams) arithmetic double-checked for a zero-drift result across a long sequence of operations (e.g. 50 simulated bills) to confirm no floating-point-style drift is possible.
 
-## Phase 2 — Parties, Billing, Stock Screens
+## Phase 2 — Parties, Billing, Stock Screens — ✅ DONE
 **Goal**: Daily-use core is usable end-to-end.
+*(Built this session: onboarding/PIN + View-mode gate + Day-0 wizard, Parties (list/detail/settlement/edit), New Bill (all three types, rate toggle, inline sub-category + custom category, soft warnings), Bills list + Pending filter, bill detail + image receipt share, Stock (cards/recommended-rate/ledger/write-off), Trash (soft-delete + restore via ledger replay). Party edit is wired to UpdateHistory. Deferred: standalone payment/allocation UI + reversal UI (Phase 3), in-place bill field editing.)*
 - Onboarding (business name, Admin PIN, optional View PIN) **plus the Day-0 Migration flow**: guided entry of opening party balances, starting cash pool positions, and baseline stock qty/cost as real dated ledger entries — this is required before the app is usable for an already-running business, not a nice-to-have added later.
 - Party list + detail (balance, history).
 - New Bill flow: type switch (Purchase/Sale/Expense), multi-line items, inline custom sub-category creation (tag-only, confirmed non-fragmenting), per-bill/per-line rate toggle, photo capture, soft stock-warning on sale.
@@ -36,8 +45,9 @@ Ordering principle: **correctness of the financial core before UI breadth, and d
 - Access-mode enforcement (`UnauthorizedException` at the use-case layer) verified from the first mutating screen — confirm a View-PIN session genuinely cannot mutate data even if a button were mistakenly left visible.
 - **Exit criteria**: owner can log a real day's purchases and sales in the app, side-by-side with his manual register, and every number matches — including onboarding his actual current opening position via Day-0 Migration rather than starting from zero.
 
-## Phase 3 — Cash & Godam, Payments
+## Phase 3 — Cash & Godam, Payments — ⬜ NOT STARTED
 **Goal**: Money movement is fully tracked and traceable.
+*(Note: the underlying use-cases — transfer_to_godam, payment recording/allocation, reversal, and the dynamic Godam FIFO trace — are already built and tested in Phase 1. This phase is the UI over them.)*
 - Cash pool screens (Home/Bank/Godam balances).
 - Transfer-to-Godam flow.
 - **Cash overdraft soft-warning** wired into every withdrawal path (bill payment, expense, Godam spend) with "Record Transfer Now" / "Continue Anyway" actions.
@@ -48,8 +58,9 @@ Ordering principle: **correctness of the financial core before UI breadth, and d
 - Cash reconciliation view.
 - **Exit criteria**: owner can answer "where did this Godam expense's money come from" in the app in 2 taps, and it matches his own memory/records of the transfer. A simulated bounced-cheque scenario is run end-to-end and the party ledger clearly shows the reversal note.
 
-## Phase 4 — Dashboard & Analytics
+## Phase 4 — Dashboard & Analytics — 🚧 PARTIAL
 **Goal**: Month-end trust — the app replaces the manual register for decision-making.
+*(Done early: net-worth + monthly P&L computation (`compute_dashboard_summary`) and a first Dashboard screen showing them. Remaining: the fl_chart profit chart, quarterly scope, and drill-down from each number to its source.)*
 - Net worth calculation.
 - Monthly/quarterly profit chart (`fl_chart`, accessible colors).
 - Receivables/payables summary.
@@ -57,7 +68,7 @@ Ordering principle: **correctness of the financial core before UI breadth, and d
 - Drill-down from any dashboard number to its source records.
 - **Exit criteria**: run the dashboard against a past month the owner already closed manually, and the profit number matches (or the discrepancy is explainable and traced to a specific missing/miscategorized entry — which itself validates the audit-trail design).
 
-## Phase 5 — Offline Sync, Backup, Sharing Polish, Theming
+## Phase 5 — Offline Sync, Backup, Sharing Polish, Theming — ⬜ NOT STARTED
 **Goal**: Production-ready daily driver.
 - Supabase backup/restore (push on connectivity, manual "backup now," device-pairing restore flow).
 - Confirm photo paths are excluded from sync payload (test this explicitly).
@@ -68,7 +79,7 @@ Ordering principle: **correctness of the financial core before UI breadth, and d
 - **Migration vault regression test**: simulate an app update that ships a schema migration, confirm the pre-migration vault file is created, then force the migration to fail and confirm automatic restore from vault leaves the business's data fully intact.
 - **Exit criteria**: airplane-mode test — full day of realistic use with zero connectivity, then reconnect and confirm clean backup sync; fresh-install-and-restore test on a second device; migration-failure drill passes without data loss.
 
-## Phase 6 — Real-World Pilot
+## Phase 6 — Real-World Pilot — ⬜ NOT STARTED
 **Goal**: Validate against actual business use, not synthetic tests.
 - Owner uses the app exclusively (no manual register) for an agreed trial period (suggest 1–2 weeks).
 - Daily diff against manual register in parallel during week 1 only, to catch discrepancies fast.

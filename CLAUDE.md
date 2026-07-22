@@ -28,8 +28,65 @@ wrong, the app has failed regardless of how it looks.
 - Domain logic lives in `lib/domain/` and is unit-tested with plain fixtures,
   independent of UI and DB, **before** any screen.
 
-## Current state (Phase 0 done; Phase 1 in progress) — 40 tests passing
+## Current state (Phase 0–2 done) — 53 tests passing
 Run `flutter test` (all green) and `flutter analyze lib test` (clean).
+
+**Phase 2 — daily-use UI, DONE (built on the Phase-1 domain core):**
+- Auth/gate: `security/pin_service.dart` (Admin + optional View PIN, deterministic
+  salted-FNV hash in `flutter_secure_storage`; `InMemoryPinService` for tests),
+  `app/app.dart` `_AppRoot` (onboarding → PIN lock → shell), `accessModeProvider` +
+  `sessionUnlockedProvider`. View-mode both hides mutating controls AND is enforced
+  in every use-case (`ensureCanMutate`).
+- Read layer: `data/local/read_queries.dart` + `app/read_providers.dart` — party
+  balances (via `LedgerService`), stock positions/recommended rate, bills w/
+  paid-status + `billIsPending`, party detail, bill view, trash view, cash pools.
+  All recompute on `ledgerRevisionProvider`; nothing stored.
+- New use-cases: `manage_party.dart` (create + edit→`UpdateHistory`),
+  `manage_stock.dart` (inline custom category + target margin), `manage_trash.dart`
+  (soft-delete + restore, Bills/Parties). **`data/local/stock_rebuild.dart`** —
+  `rebuildCategoryStock` replays the surviving ledger (purchase/sale lines +
+  write-offs, chronological) to keep stored qty/cost exact across a delete/restore
+  (never an approximate inverse of the moving-average).
+- Screens (`presentation/`): `onboarding/` (onboarding_screen, pin_screen, pin_pad,
+  day_zero_screen), `parties/` (parties_screen, party_detail_screen w/ Settlement +
+  History tabs, new_party_sheet w/ picker + edit), `bills/` (new_bill_screen —
+  one surface, 3 types, rate toggle, inline sub-category, category_picker;
+  bills_screen w/ Pending filter; bill_detail_screen w/ image receipt share),
+  `stock/` (stock_screen, stock_ledger_screen w/ sub-tag filter, write_off_sheet),
+  `trash/trash_screen.dart`.
+- Shared widgets: `pill_button`, `calm_sheet` (showCalmConfirm/showWarningsSheet/
+  showCalmError/showCalmInfo), `form_fields` (AppTextField, SegmentedPills),
+  `use_case_runner` (`runWithConfirm`/`confirmAndRun` drive the `NeedsConfirmation`
+  round-trip), `core/errors/error_copy.dart` (single calm-copy map),
+  `core/utils/date_format.dart`.
+- Tests added: `test/data/trash_test.dart` (hand-traced delete/restore stock
+  rebuild + party-guard + View-mode block), `test/widget/new_bill_flow_test.dart`.
+- Deferred to Phase 3: standalone payment-recording + manual-allocation UI,
+  Payment-Reversal UI, Cash & Godam + Roznamcha screens, in-place bill *field*
+  editing (a mistaken bill is corrected via Trash + re-enter today).
+
+**Phase 2 — earlier UI foundation + Dashboard:**
+- `lib/core/theme/` — `app_colors.dart` (`AppColors` ThemeExtension, light/dark
+  tokens; Coinbase Blue only accent; `AppRadius`; `context.c` accessor),
+  `app_theme.dart` (Inter UI / JetBrains Mono figures via `monoStyle`; fonts fall
+  back until TTFs are bundled).
+- `lib/app/providers.dart` — Riverpod DI: `appDatabaseProvider` (overridden in
+  main / tests), `accessControllerProvider`, one provider per use-case,
+  `dashboardSummaryProvider` + `poolBalancesProvider` (FutureProvider.autoDispose,
+  recompute on `ledgerRevisionProvider` bump — call `bumpLedger(ref)` after any
+  mutation). Drift streams can replace the revision token later.
+- `lib/app/app.dart` (`GodamLedgerApp`), `app_shell.dart` (drawer nav; only
+  Dashboard built, rest are placeholders), `main.dart` (ProviderScope +
+  `openAppDatabase` via path_provider).
+- `lib/presentation/shared_widgets/` — `AmountText` (mono, semantic tone),
+  `AppCard`/`SectionLabel`.
+- `lib/presentation/home_dashboard/dashboard_screen.dart` — always-dark net-worth
+  card, cash-pool chips, profit card, separate receivable/payable, plain-terms.
+- `test/widget/dashboard_screen_test.dart` — renders real derived figures.
+- **NOTE**: fonts Inter/JetBrainsMono are named but TTFs not yet bundled (falls
+  back to platform). Onboarding/PIN + Day-0 wizard UI not built — app opens
+  straight to the shell for now.
+
 
 **Phase 0 — schema lock + vaulting (done):**
 - `lib/data/local/tables.dart` — all 13 tables, UUID PKs, integer Paisa/Grams,

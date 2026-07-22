@@ -3,6 +3,8 @@
 
 *(See `06_DESIGN_SYSTEM.md` for the validated visual design reference — an interactive HTML prototype and its extracted color/type/shape tokens. That file is the actual UI spec for this app, not a generic style guide.)*
 
+> **Build status (2026-07-22)** — the financial core (§3 concepts, §4.6 dashboard math, §4.3 costing, §4.4 Godam FIFO, §4.8 reversal, Day-0 onboarding) is implemented and test-proven at the domain layer. **Phase 2 UI is now complete**: onboarding + PIN + View-only mode, Parties (list/detail/settlement/edit), New Bill (§4.2 Purchase/Sale/Expense with per-bill/per-line rate, inline sub-category, soft warnings), Bills list + pending filter, image receipt share, Stock (§4.3 cards/recommended-rate/ledger/write-off), and Trash (§4.8 soft-delete + restore) are all built and green (53 tests). **Not yet built (Phase 3+):** standalone payment recording + manual allocation UI (§4.1/§4.2 — bills carry inline payments today), Payment Reversal UI (§4.8), Cash & Godam screens (§4.4), Cash Flow Ledger/Roznamcha (§4.5), reconciliation view, in-place bill *field* editing, and Supabase backup/sync (§4.7). Feature-by-feature UI status lives in `04_PHASES.md`; nothing here in the PRD has changed scope.
+
 ## 1. What This App Actually Is
 
 This is **not** a generic inventory or invoicing app. It is a **single-user, offline-first ledger and cost-accounting tool** for a scrap/raw-material trading business (Bura, Degi Bura, Scrap + custom sub-categories), where the owner needs to know, at any moment, with zero manual calculation:
