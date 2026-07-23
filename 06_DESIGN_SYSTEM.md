@@ -1,8 +1,9 @@
 # Design System — extracted & validated from the Claude Design prototype
 
 > **Implementation note (2026-07-23)** — the gaps listed in §5 below were
-> identified against the HTML prototype, not against built code. As of Phase 3,
-> items 1, 2, 3, 4, 5, 6, and 7 have all been implemented directly in Flutter
+> identified against the HTML prototype, not against built code. As of Phase 4,
+> items 1–7 and the profit chart (item 10) have all been implemented directly in
+> Flutter
 > (following this doc's tokens) rather than first added back to the HTML
 > prototype — see the per-item notes in §5 and `04_PHASES.md`/`05_MEMORY.md` for
 > what actually shipped. The HTML prototype itself was not regenerated to match;
@@ -102,7 +103,7 @@ Being honest about gaps, since you asked what to include beyond what's there:
 7. **Settlement history tab on Party Detail** — the unified advances+bills+payments timeline per party (now PRD §4.1) needs to be added to `isPartyDetail`. This matters especially for the bidirectional-balance case: a party can simultaneously have a standing receivable (they owe you from before) and an in-progress payable (you owe them for a current purchase) — the design must show both numbers clearly side by side, never silently netted into one figure. **✅ Built (Phase 2)** — the Settlement tab in `presentation/parties/party_detail_screen.dart`; Phase 3 added tap-to-reverse on payment rows there.
 8. **Empty states** — no evidence of empty-state screens (new user, zero bills yet, zero stock) — these matter for first real use. **Partially built** — e.g. `parties_screen.dart`'s `_Empty`, `godam_ledger_screen.dart`'s empty state; not yet audited across every screen.
 9. **Error/validation states** — the calm-error-copy principle needs actual visual treatment (inline banner component) somewhere in the prototype; not clearly present as a distinct state. **✅ Built (Phase 2)** — `showCalmError`/`showCalmInfo` in `shared_widgets/calm_sheet.dart` + `core/errors/error_copy.dart`.
-10. **Accessibility check on the chart** — PRD calls for "accessibility-validated colors" on the profit bar chart; worth explicitly re-checking contrast on the `monthlyBars` treatment before finalizing. **⬜ Still outstanding** — the `fl_chart` profit chart itself isn't built yet (Phase 4).
+10. **Accessibility check on the chart** — PRD calls for "accessibility-validated colors" on the profit bar chart; worth explicitly re-checking contrast on the `monthlyBars` treatment before finalizing. **✅ Built (Phase 4)** — `presentation/home_dashboard/profit_chart.dart` (`ProfitChart`, `fl_chart` `BarChart`): Coinbase-Blue bars for profit / semantic-red for a loss period, both clearing WCAG AA graphical-object contrast on the card surface, and crucially each bar carries a text value label (and tooltip) so colour is never the sole information channel. A formal light/dark re-check remains folded into the Phase-5 accessibility sweep, but the shipped chart follows the token rules (blue-only accent + polarity-only red).
 
 ## 6. Recommendation
 

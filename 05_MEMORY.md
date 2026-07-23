@@ -96,7 +96,16 @@ Not "tests pass" or "builds clean" — the bar is: **hand-trace a real day/month
   payment recording + manual allocation, allocate-existing-advance, and the
   non-destructive payment-reversal/bounce flow. New derived read layer
   (`cash_read_queries` + `cash_read_providers`). 55 tests green.
-- **Phases 4–6 ⬜ NOT STARTED** (Phase-4 net-worth/P&L math already done in Phase 1).
+- **Phase 4 ✅ DONE (2026-07-23)** — Dashboard & Analytics over the Phase-1 P&L
+  math: Month/Quarter scope toggle, `fl_chart` profit-trend bar chart (last 6
+  periods, blue-profit/red-loss with text value labels so colour isn't the only
+  channel, tap-a-bar drill-down), receivables/payables-by-party screen (two
+  never-netted tabs), and full number→source drill-down across the dashboard.
+  Use-case gained `profitSeries()` + quarterly `periodBounds`; `DashboardSummary`
+  gained `periodStart/periodEnd/scope` + `biggestExpenseBillId` +
+  `largestReceivablePartyId`. New screens: `home_dashboard/profit_chart.dart`,
+  `period_detail_screen.dart`, `receivables_screen.dart`. 57 tests green.
+- **Phases 5–6 ⬜ NOT STARTED.**
 
 **Documented deviations from `02_ARCHITECTURE.md` §6** (all deliberate, for
 integer-exactness): StockCategory stores `quantityGrams` + `totalCostBasisPaisa`
@@ -176,4 +185,32 @@ the file-by-file map.
   to fix it for good, regardless of SDK version. Deferred to Phase 4/5: fl_chart
   profit chart + dashboard drill-downs, in-place bill *field* editing, and
   Supabase backup/sync.
+- **2026-07-23 (Phase 4 completed — Dashboard & Analytics)**: Finished the
+  dashboard over the already-tested Phase-1 P&L math — this phase was scope +
+  chart + drill-downs, not new financial logic. `compute_dashboard_summary.dart`
+  gained a `scope` parameter (month/quarter via a static `periodBounds` helper),
+  a `profitSeries({scope, count, anchor})` method that loads bills/line-items/
+  write-offs once and buckets revenue−COGS−(cash+wastage expense) per period
+  (Day-0 opening bills excluded, identical to the month math), and two drill-down
+  ids on the result (`biggestExpenseBillId`, `largestReceivablePartyId`);
+  `DashboardSummary` also now carries `scope`/`periodStart`/`periodEnd` so a
+  tapped bar or the profit card re-requests the exact window. Providers:
+  `dashboardScopeProvider` (StateProvider), `profitSeriesProvider`, and
+  `periodDetailProvider.family<DashboardSummary, PeriodKey>`; `dashboardSummary
+  Provider` now watches the scope. UI (`presentation/home_dashboard/`):
+  `profit_chart.dart` (`ProfitChart` — `fl_chart` `BarChart`, blue-profit/red-loss
+  bars **with** text value labels + tooltip so colour is never the sole channel,
+  tap→drill), `period_detail_screen.dart` (period P&L + the contributing sale/
+  expense bills, each → Bill Detail), `receivables_screen.dart` (two never-netted
+  tabs sorted top-first → Party Detail); `dashboard_screen.dart` rebuilt with the
+  Month/Quarter toggle, the chart card, and every figure made tappable (net-worth
+  Cash/Stock chips → Cash/Stock, profit → period detail, receivable/payable →
+  receivables, plain-terms → stock ledger / bill / party). **57 tests green**
+  (added `test/data/profit_series_test.dart` hand-tracing two months → per-month
+  bars + the Q3 quarterly total + drill-down ids, and a chart/scope-toggle widget
+  test). `flutter analyze lib test` clean. Machine: Flutter 3.44.7 at
+  `/home/samiullah/Android/flutter`, `fl_chart 1.2.0` (note its 1.x API —
+  `getTooltipColor` not `tooltipBgColor`, `SideTitleWidget(meta:…, child:…)`).
+  Deferred to Phase 5: Supabase backup/sync, in-place bill *field* editing, and a
+  formal light/dark chart contrast re-check on the accessibility sweep.
 - **2026-07-22 (first code — Phases 0, 1, and start of 2)**: Scaffolded the Flutter project (`flutter create`, org `com.godamledger`) with the approved dependency set. Built and test-proved **Phase 0** (Drift schema + seeding + `DbVault` pre-migration vaulting) and all of **Phase 1** (the 5 domain services and every use-case, including `run_day_zero_migration` and `compute_dashboard_summary`). Started **Phase 2**: design-system theme, Riverpod DI, app shell, and the Dashboard screen with a widget test. **47 tests pass; `flutter analyze lib test` clean.** Recorded deliberate schema deviations for integer-exactness (StockCategory `quantityGrams`+`totalCostBasisPaisa` with derived avgCost; `ratePaisaPerKg`; Bill `isOpening` flag) and deferred the repository layer (use-cases hit `AppDatabase` directly, one-transaction invariant preserved). Validation highlight: a hand-traced day-0-plus-a-month scenario where net worth increases by exactly the period profit — evidence the whole ledger is internally consistent. See per-doc status banners (added this session) and `CLAUDE.md` for the file map.

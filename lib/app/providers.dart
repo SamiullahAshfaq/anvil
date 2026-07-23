@@ -101,13 +101,42 @@ final manageStockProvider = Provider<ManageStock>((ref) => ManageStock(
 /// this later, but this keeps derived numbers correct without staleness now.
 final ledgerRevisionProvider = StateProvider<int>((ref) => 0);
 
-/// The dashboard summary for the current calendar month. Recomputes whenever the
-/// ledger revision bumps.
+/// Whether the dashboard P&L is scoped to the month or the quarter (01_PRD.md
+/// §4.6). Only the P&L/chart react to this — position figures are always "now".
+final dashboardScopeProvider =
+    StateProvider<PeriodScope>((ref) => PeriodScope.month);
+
+/// The dashboard summary for the current period (month or quarter per
+/// [dashboardScopeProvider]). Recomputes whenever the ledger revision bumps.
 final dashboardSummaryProvider =
     FutureProvider.autoDispose<DashboardSummary>((ref) async {
   ref.watch(ledgerRevisionProvider);
+  final scope = ref.watch(dashboardScopeProvider);
   final db = ref.watch(appDatabaseProvider);
-  return ComputeDashboardSummary(db).call();
+  return ComputeDashboardSummary(db).call(scope: scope);
+});
+
+/// The trailing profit series (last 6 periods) behind the bar chart, in the
+/// current scope. Recomputes on ledger-revision bumps and scope changes.
+final profitSeriesProvider =
+    FutureProvider.autoDispose<List<PeriodProfit>>((ref) async {
+  ref.watch(ledgerRevisionProvider);
+  final scope = ref.watch(dashboardScopeProvider);
+  final db = ref.watch(appDatabaseProvider);
+  return ComputeDashboardSummary(db).profitSeries(scope: scope, count: 6);
+});
+
+/// Identifies one drill-down period (a tapped bar or the current period card).
+typedef PeriodKey = ({int year, int month, PeriodScope scope});
+
+/// Full summary for a specific period, so tapping a chart bar or the profit card
+/// opens that exact month/quarter. Recomputes on ledger-revision bumps.
+final periodDetailProvider = FutureProvider.autoDispose
+    .family<DashboardSummary, PeriodKey>((ref, key) async {
+  ref.watch(ledgerRevisionProvider);
+  final db = ref.watch(appDatabaseProvider);
+  return ComputeDashboardSummary(db)
+      .call(year: key.year, month: key.month, scope: key.scope);
 });
 
 /// Per-pool balances (Home/Bank/Godam), derived from cash movements. Recomputes

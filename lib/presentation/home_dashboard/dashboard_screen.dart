@@ -6,8 +6,17 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme.dart';
 import '../../data/local/tables.dart';
 import '../../domain/entities/dashboard_summary.dart';
+import '../bills/bill_detail_screen.dart';
+import '../cash_godam/cash_screen.dart';
+import '../parties/party_detail_screen.dart';
 import '../shared_widgets/amount_text.dart';
 import '../shared_widgets/app_card.dart';
+import '../shared_widgets/form_fields.dart';
+import '../stock/stock_ledger_screen.dart';
+import '../stock/stock_screen.dart';
+import 'period_detail_screen.dart';
+import 'profit_chart.dart';
+import 'receivables_screen.dart';
 
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
@@ -15,6 +24,8 @@ class DashboardScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final summary = ref.watch(dashboardSummaryProvider);
+    final scope = ref.watch(dashboardScopeProvider);
+    final scopeWord = scope == PeriodScope.quarter ? 'QUARTER' : 'MONTH';
     return Scaffold(
       appBar: AppBar(title: const Text('Dashboard')),
       body: RefreshIndicator(
@@ -30,8 +41,26 @@ class DashboardScreen extends ConsumerWidget {
               const SectionLabel('CASH ON HAND'),
               const _PoolChips(),
               const SizedBox(height: 20),
-              const SectionLabel('THIS MONTH'),
+              Row(
+                children: [
+                  Expanded(child: SectionLabel('THIS $scopeWord')),
+                  SizedBox(
+                    width: 168,
+                    child: SegmentedPills<PeriodScope>(
+                      values: PeriodScope.values,
+                      selected: scope,
+                      labelOf: (p) =>
+                          p == PeriodScope.quarter ? 'Quarter' : 'Month',
+                      onSelect: (p) =>
+                          ref.read(dashboardScopeProvider.notifier).state = p,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
               _ProfitCard(summary: s),
+              const SizedBox(height: 12),
+              const _ProfitChartCard(),
               const SizedBox(height: 20),
               const SectionLabel('WHO OWES WHOM'),
               _ReceivablePayableCard(summary: s),
@@ -46,7 +75,9 @@ class DashboardScreen extends ConsumerWidget {
   }
 }
 
-/// The always-dark hero card anchoring net worth (06_DESIGN_SYSTEM.md §3).
+/// The always-dark hero card anchoring net worth (06_DESIGN_SYSTEM.md §3). Its
+/// two chips drill into where that value lives — Cash → Cash & Godam, Stock →
+/// Stock (03_RULES.md §1.14).
 class _NetWorthCard extends StatelessWidget {
   final DashboardSummary summary;
   const _NetWorthCard({required this.summary});
@@ -74,10 +105,18 @@ class _NetWorthCard extends StatelessWidget {
           Row(
             children: [
               _DarkChip(
-                  label: 'Cash', paisa: summary.cashOnHandPaisa),
+                label: 'Cash',
+                paisa: summary.cashOnHandPaisa,
+                onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                    builder: (_) => const CashScreen())),
+              ),
               const SizedBox(width: 10),
               _DarkChip(
-                  label: 'Stock', paisa: summary.stockValueAtCostPaisa),
+                label: 'Stock',
+                paisa: summary.stockValueAtCostPaisa,
+                onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                    builder: (_) => const StockScreen())),
+              ),
             ],
           ),
         ],
@@ -89,26 +128,40 @@ class _NetWorthCard extends StatelessWidget {
 class _DarkChip extends StatelessWidget {
   final String label;
   final int paisa;
-  const _DarkChip({required this.label, required this.paisa});
+  final VoidCallback? onTap;
+  const _DarkChip({required this.label, required this.paisa, this.onTap});
 
   @override
   Widget build(BuildContext context) {
     final c = context.c;
     return Expanded(
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-        decoration: BoxDecoration(
-          color: c.surfaceDarkElevated,
-          borderRadius: BorderRadius.circular(AppRadius.secondary),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(label, style: monoStyle(size: 11, color: c.onDarkSoft)),
-            const SizedBox(height: 4),
-            AmountText(paisa,
-                size: 16, tone: AmountTone.onDark, showSymbol: false),
-          ],
+      child: Material(
+        color: c.surfaceDarkElevated,
+        borderRadius: BorderRadius.circular(AppRadius.secondary),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          child: Padding(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text(label, style: monoStyle(size: 11, color: c.onDarkSoft)),
+                    if (onTap != null) ...[
+                      const SizedBox(width: 4),
+                      Icon(Icons.chevron_right, size: 13, color: c.onDarkSoft),
+                    ],
+                  ],
+                ),
+                const SizedBox(height: 4),
+                AmountText(paisa,
+                    size: 16, tone: AmountTone.onDark, showSymbol: false),
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -139,6 +192,8 @@ class _PoolChips extends ConsumerWidget {
               child: AppCard(
                 radius: AppRadius.secondary,
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const CashScreen())),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -163,6 +218,8 @@ class _PoolChips extends ConsumerWidget {
   }
 }
 
+/// Period P&L summary; tap to open the full period drill-down (contributing
+/// sale/expense bills).
 class _ProfitCard extends StatelessWidget {
   final DashboardSummary summary;
   const _ProfitCard({required this.summary});
@@ -171,6 +228,15 @@ class _ProfitCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final profit = summary.periodProfitPaisa;
     return AppCard(
+      onTap: () => Navigator.of(context).push(MaterialPageRoute(
+        builder: (_) => PeriodDetailScreen(
+          periodKey: (
+            year: summary.periodStart.year,
+            month: summary.periodStart.month,
+            scope: summary.scope,
+          ),
+        ),
+      )),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -178,7 +244,13 @@ class _ProfitCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text('Profit', style: Theme.of(context).textTheme.titleMedium),
+              Row(
+                children: [
+                  Text('Profit', style: Theme.of(context).textTheme.titleMedium),
+                  const SizedBox(width: 4),
+                  Icon(Icons.chevron_right, size: 18, color: context.c.muted),
+                ],
+              ),
               AmountText(profit,
                   size: 22,
                   weight: FontWeight.w600,
@@ -193,6 +265,44 @@ class _ProfitCard extends StatelessWidget {
       ),
     );
   }
+}
+
+class _ProfitChartCard extends ConsumerWidget {
+  const _ProfitChartCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final series = ref.watch(profitSeriesProvider);
+    return AppCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Profit trend',
+              style: Theme.of(context).textTheme.titleMedium),
+          const SizedBox(height: 4),
+          Text('Tap a bar to open that period',
+              style: TextStyle(color: context.c.muted, fontSize: 12)),
+          const SizedBox(height: 16),
+          series.when(
+            loading: () => const SizedBox(
+                height: 180,
+                child: Center(child: CircularProgressIndicator())),
+            error: (e, _) => SizedBox(height: 120, child: Center(child: Text('$e'))),
+            data: (list) => ProfitChart(
+              series: list,
+              onBarTap: (p) => Navigator.of(context).push(MaterialPageRoute(
+                builder: (_) => PeriodDetailScreen(
+                  periodKey: (year: p.year, month: p.month, scope: _scope(ref)),
+                ),
+              )),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  PeriodScope _scope(WidgetRef ref) => ref.read(dashboardScopeProvider);
 }
 
 class _Line extends StatelessWidget {
@@ -222,11 +332,13 @@ class _ReceivablePayableCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Receivable and payable are ALWAYS two separate numbers, never netted
-    // (01_PRD.md §4.1).
+    // (01_PRD.md §4.1). Each tile drills into that side's parties, top-first.
     return Row(
       children: [
         Expanded(
           child: AppCard(
+            onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                builder: (_) => const ReceivablesScreen(initialTab: 0))),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -244,6 +356,8 @@ class _ReceivablePayableCard extends StatelessWidget {
         const SizedBox(width: 12),
         Expanded(
           child: AppCard(
+            onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                builder: (_) => const ReceivablesScreen(initialTab: 1))),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -262,6 +376,9 @@ class _ReceivablePayableCard extends StatelessWidget {
   }
 }
 
+/// Plain-language takeaways (01_PRD.md §4.6). Each line that has a source record
+/// is tappable to it — best/worst margin → that category's stock ledger, biggest
+/// expense → its bill, largest receivable → that party.
 class _PlainTermsCard extends StatelessWidget {
   final DashboardSummary summary;
   const _PlainTermsCard({required this.summary});
@@ -269,23 +386,49 @@ class _PlainTermsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.c;
-    final lines = <String>[];
+    final lines = <({String text, VoidCallback? onTap})>[];
+
     final best = summary.bestMarginCategory;
     if (best != null && best.revenuePaisa > 0) {
-      lines.add('Best margin this month: ${best.name}.');
+      lines.add((
+        text: 'Best margin this ${_scopeWord(summary.scope)}: ${best.name}.',
+        onTap: () => Navigator.of(context).push(MaterialPageRoute(
+            builder: (_) => StockLedgerScreen(
+                categoryId: best.categoryId, categoryName: best.name))),
+      ));
     }
     final worst = summary.worstMarginCategory;
     if (worst != null && worst.categoryId != best?.categoryId) {
-      lines.add('Watch the margin on ${worst.name}.');
+      lines.add((
+        text: 'Watch the margin on ${worst.name}.',
+        onTap: () => Navigator.of(context).push(MaterialPageRoute(
+            builder: (_) => StockLedgerScreen(
+                categoryId: worst.categoryId, categoryName: worst.name))),
+      ));
     }
     if (summary.biggestExpenseLabel != null) {
-      lines.add('Biggest expense: ${summary.biggestExpenseLabel}.');
+      lines.add((
+        text: 'Biggest expense: ${summary.biggestExpenseLabel}.',
+        onTap: summary.biggestExpenseBillId == null
+            ? null
+            : () => Navigator.of(context).push(MaterialPageRoute(
+                builder: (_) =>
+                    BillDetailScreen(billId: summary.biggestExpenseBillId!))),
+      ));
     }
     if (summary.largestReceivablePartyName != null) {
-      lines.add(
-          '${summary.largestReceivablePartyName} owes the most right now.');
+      lines.add((
+        text: '${summary.largestReceivablePartyName} owes the most right now.',
+        onTap: summary.largestReceivablePartyId == null
+            ? null
+            : () => Navigator.of(context).push(MaterialPageRoute(
+                builder: (_) => PartyDetailScreen(
+                    partyId: summary.largestReceivablePartyId!))),
+      ));
     }
-    if (lines.isEmpty) lines.add('No activity yet this month.');
+    if (lines.isEmpty) {
+      lines.add((text: 'No activity yet this ${_scopeWord(summary.scope)}.', onTap: null));
+    }
 
     return Container(
       width: double.infinity,
@@ -298,15 +441,30 @@ class _PlainTermsCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           for (final l in lines)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 4),
-              child: Text('•  $l',
-                  style: Theme.of(context).textTheme.bodyLarge),
+            InkWell(
+              onTap: l.onTap,
+              borderRadius: BorderRadius.circular(8),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 2),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text('•  ${l.text}',
+                          style: Theme.of(context).textTheme.bodyLarge),
+                    ),
+                    if (l.onTap != null)
+                      Icon(Icons.chevron_right, size: 16, color: c.muted),
+                  ],
+                ),
+              ),
             ),
         ],
       ),
     );
   }
+
+  String _scopeWord(PeriodScope s) =>
+      s == PeriodScope.quarter ? 'quarter' : 'month';
 }
 
 class _ErrorState extends StatelessWidget {

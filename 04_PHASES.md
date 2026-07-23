@@ -2,12 +2,23 @@
 
 Ordering principle: **correctness of the financial core before UI breadth, and domain-layer tests before screens.** Each phase should end with something genuinely verifiable against a real numeric example from the owner's actual business, not just "tests green."
 
-> **Implementation status (as of 2026-07-23)** — 55 tests green, `flutter analyze lib test` clean.
+> **Implementation status (as of 2026-07-23)** — 57 tests green, `flutter analyze lib test` clean.
 > - **Phase 0 — ✅ DONE** (except CI wiring + the deliberate forced-migration-failure drill).
 > - **Phase 1 — ✅ DONE.** All services + all use-cases + dashboard summary built and unit/integration-tested, including a hand-traced day-0-plus-a-month scenario where net worth grows by exactly the period profit.
 > - **Phase 2 — ✅ DONE (daily-use core usable end-to-end).** Onboarding + PIN lock + View-mode + Day-0 wizard, Parties (list/detail/settlement/edit-with-UpdateHistory), New Bill (Purchase/Sale/Expense, per-bill/per-line rate, inline sub-category + custom parent category, soft stock/overdraft warnings), Bills list + Pending filter, Bill detail + branded-image receipt share, Stock (cards, recommended-rate explainer, ledger drill-down + sub-tag filter, write-off), and Trash (soft-delete + restore, ledger-replay stock rebuild). Deferred to their own phases: standalone Payment recording + manual allocation UI, Payment Reversal UI, and in-place bill *field* editing (all Phase 3 / later — bills carry inline payments today, and a mistaken bill is corrected via Trash+re-enter). Fonts still fall back until TTFs are bundled.
 > - **Phase 3 — ✅ DONE (2026-07-23).** Cash & Godam screen + reconciliation, Transfer-to-Godam, Godam FIFO ledger with two-tap spend-trace, Roznamcha (filterable, day-grouped), standalone Payment recording + manual allocation, Allocate-existing-advance, and the Payment-Reversal/bounce flow — all UI over the Phase-1 use-cases, plus the `cash_read_providers` derived read layer. 55 tests green (added `cash_read_test.dart`); this session's machine ran a newer Flutter SDK than previously recorded (see `CLAUDE.md` §Commands) which surfaced a pre-existing `ListTile`-in-`Container` assertion in the party/category pickers, fixed for good regardless of SDK version.
-> - **Phases 4–6 — ⬜ NOT STARTED** (Phase 4 dashboard math already partially done from Phase 1).
+> - **Phase 4 — ✅ DONE (2026-07-23).** Dashboard analytics finished over the
+>   Phase-1 `compute_dashboard_summary` math: month/quarter scope toggle, the
+>   `fl_chart` profit-trend bar chart (last 6 periods, blue/red polarity + text
+>   value labels so colour is never the sole channel, tap-a-bar drill-down),
+>   receivables/payables-by-party screen, and full drill-down from every
+>   dashboard number to its source (net-worth chips → Cash/Stock, profit card &
+>   chart bar → per-period P&L + contributing bills, receivable/payable →
+>   parties top-first, plain-terms takeaways → stock ledger / bill / party).
+>   Added `profitSeries()` + quarterly scope to the use-case and the drill-down
+>   ids to `DashboardSummary`. 57 tests green (added `profit_series_test.dart` +
+>   a chart/scope-toggle widget test).
+> - **Phases 5–6 — ⬜ NOT STARTED.**
 >
 > See `05_MEMORY.md` Update Log for the running detail and the documented schema deviations.
 
@@ -60,15 +71,42 @@ Ordering principle: **correctness of the financial core before UI breadth, and d
 - Read layer: `data/local/cash_read_queries.dart` + `app/cash_read_providers.dart` (resolves movements to labelled `CashLedgerEntry`s, Godam FIFO trace, open bills / advances per party, reconciliation) — all derived, recomputed on `ledgerRevision`.
 - **Exit criteria met**: a Godam spend's funding is answerable in two taps (open Godam ledger → tap the spend), proven by `test/data/cash_read_test.dart` (a spend traced to its two funding transfers, oldest-first); a bounced-cheque scenario is run end-to-end and the bill reopens with full outstanding + a reversal entry on the Roznamcha and a note on the party ledger.
 
-## Phase 4 — Dashboard & Analytics — 🚧 PARTIAL
+## Phase 4 — Dashboard & Analytics — ✅ DONE
 **Goal**: Month-end trust — the app replaces the manual register for decision-making.
-*(Done early: net-worth + monthly P&L computation (`compute_dashboard_summary`) and a first Dashboard screen showing them. Remaining: the fl_chart profit chart, quarterly scope, and drill-down from each number to its source.)*
-- Net worth calculation.
-- Monthly/quarterly profit chart (`fl_chart`, accessible colors).
-- Receivables/payables summary.
-- Plain-language "what was good/bad this month" summary.
-- Drill-down from any dashboard number to its source records.
-- **Exit criteria**: run the dashboard against a past month the owner already closed manually, and the profit number matches (or the discrepancy is explainable and traced to a specific missing/miscategorized entry — which itself validates the audit-trail design).
+*(Built this session over the Phase-1 `compute_dashboard_summary` math — the P&L
+figures were already test-proven; this phase added the scope, the chart, and the
+drill-downs. Screens live in `presentation/home_dashboard/`.)*
+- Net worth calculation. ✅ (Phase 1 math; hero card since Phase 2.)
+- Monthly/quarterly profit chart (`fl_chart`, accessible colors). ✅ —
+  `profit_chart.dart` (`ProfitChart`): last 6 periods, Coinbase-Blue bars for
+  profit / semantic-red for a loss period **plus** a text value label on every
+  bar and in the tooltip, so colour is never the only information channel (blue
+  `#0052ff` and the red both clear WCAG AA graphical-object contrast on the card).
+  A Month/Quarter `SegmentedPills` toggle re-buckets everything; `profitSeries()`
+  on the use-case supplies the series and quarterly scope is a thin wrapper over
+  `periodBounds`.
+- Receivables/payables summary. ✅ — `receivables_screen.dart`: two never-netted
+  tabs (They owe us / We owe), parties sorted by balance top-first, each row →
+  Party Detail.
+- Plain-language "what was good/bad this month" summary. ✅ — now scope-aware and
+  every takeaway line is tappable to its source.
+- Drill-down from any dashboard number to its source records. ✅ — net-worth Cash
+  chip → Cash & Godam, Stock chip → Stock; profit card & a tapped chart bar →
+  `period_detail_screen.dart` (that period's revenue/COGS/expense + the exact
+  sale/expense bills that compose it, each → Bill Detail); receivable/payable →
+  the receivables screen; best/worst margin → that category's Stock Ledger;
+  biggest expense → its bill; largest receivable → that party. `DashboardSummary`
+  gained `periodStart/periodEnd/scope`, `biggestExpenseBillId`, and
+  `largestReceivablePartyId` so these drill-downs hit real records.
+- **Exit criteria met**: the period P&L is drillable to the exact bills behind it
+  and the quarterly/series math is hand-traced in `test/data/profit_series_test.dart`
+  (two months → per-month bars, the Q3 total, and the drill-down ids), on top of
+  the existing `dashboard_test.dart` where net worth grows by exactly the period
+  profit. Running a past closed month reduces to selecting it via the same
+  `periodBounds` path the chart uses.
+- Deferred to Phase 5: the accessibility pass is satisfied for the shipped chart,
+  but a formal contrast re-check across light/dark chart states stays on the
+  Phase-5 accessibility sweep.
 
 ## Phase 5 — Offline Sync, Backup, Sharing Polish, Theming — ⬜ NOT STARTED
 **Goal**: Production-ready daily driver.

@@ -2,8 +2,8 @@
 
 These rules exist because the first build technically "passed tests" while missing the actual business logic. Passing tests is not the goal — **matching real business behavior** is. Read the PRD and Architecture docs first; this file governs *how* to build what's specified there.
 
-> **Compliance status (2026-07-23)** — domain/use-case layer + Phase-2/3 UI follow
-> these rules, proven by 55 tests: domain-first with tests before UI (§1.1);
+> **Compliance status (2026-07-23)** — domain/use-case layer + Phase-2/3/4 UI
+> follow these rules, proven by 57 tests: domain-first with tests before UI (§1.1);
 > one-use-case-one-transaction (§1.2); derived balances (§1.3); moving-average
 > with zero/negative reset (§1.4); per-bill/per-line rate (§1.5, in New Bill);
 > soft stock validation (§1.6, calm warning sheet); **manual many-to-many payment
@@ -23,7 +23,12 @@ These rules exist because the first build technically "passed tests" while missi
 > Godam transfers); Day-0 as dated entries (§1.26, wizard); pre-migration
 > vaulting (§1.27); soft-delete → Trash + restore (§1.11, `manage_trash`, bill
 > delete replays the ledger to keep stock exact); UpdateHistory on party edits
-> (§1.12/§1.19); centralized calm-error copy (§4, `core/errors/error_copy.dart`).
+> (§1.12/§1.19); centralized calm-error copy (§4, `core/errors/error_copy.dart`);
+> **every dashboard number traceable to source (§1.14 — Phase-4 drill-downs: a
+> chart bar / the profit card → that period's P&L + its bills; net-worth chips →
+> Cash/Stock; receivable/payable → parties; plain-terms → stock ledger / bill /
+> party), the profit chart pairing colour with text value labels (never colour-
+> only)**.
 > **Still outstanding**: CI (§3); UpdateHistory on in-place *bill* edits (§1.19 —
 > bill field-edit UI not built, Trash+re-enter used instead); photo capture +
 > photo-path sync exclusion test (§1.10 — no sync layer yet); 30-day auto-purge

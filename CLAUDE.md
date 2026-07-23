@@ -28,13 +28,42 @@ wrong, the app has failed regardless of how it looks.
 - Domain logic lives in `lib/domain/` and is unit-tested with plain fixtures,
   independent of UI and DB, **before** any screen.
 
-## Current state (Phase 0–3 done) — 55 tests passing
+## Current state (Phase 0–4 done) — 57 tests passing
 Run `flutter test` (all green) and `flutter analyze lib test` (clean).
 SDK note: the Flutter install path and version are **machine-specific** — this
 repo has been worked on from more than one machine, and the SDK path/version
 under §Commands below reflects whichever machine last confirmed it. Always
 verify locally (`which flutter`, `flutter --version`) rather than assuming the
 documented path is current for the machine you're on.
+
+**Phase 4 — Dashboard & Analytics, DONE (built over Phase-1 `compute_dashboard_summary`):**
+- Use-case: `compute_dashboard_summary.dart` gained a `scope` param (month/quarter
+  via static `periodBounds`), a `profitSeries({scope, count, anchor})` bucketer
+  (loads bills/line-items/write-offs once; profit = revenue − COGS − (cash +
+  wastage expense), Day-0 opening bills excluded — same math as the month view),
+  and two drill-down ids on the result. `DashboardSummary` (entity) now carries
+  `scope`/`periodStart`/`periodEnd`, `biggestExpenseBillId`,
+  `largestReceivablePartyId`, plus the new `PeriodScope` enum + `PeriodProfit`.
+- Providers (`app/providers.dart`): `dashboardScopeProvider` (StateProvider),
+  `profitSeriesProvider`, `periodDetailProvider.family<DashboardSummary, PeriodKey>`
+  (`PeriodKey = ({int year, int month, PeriodScope scope})`); `dashboardSummary
+  Provider` watches the scope. All recompute on `ledgerRevisionProvider`.
+- Screens (`presentation/home_dashboard/`): `profit_chart.dart` (`ProfitChart` —
+  `fl_chart 1.2.0` `BarChart`; blue-profit / red-loss bars WITH text value labels
+  + tooltip so colour is never the sole channel; tap a bar → period drill-down),
+  `period_detail_screen.dart` (a period's revenue/COGS/expense + the sale/expense
+  bills that compose it, each → Bill Detail), `receivables_screen.dart` (two
+  never-netted tabs, parties top-first → Party Detail). `dashboard_screen.dart`
+  rebuilt: Month/Quarter `SegmentedPills`, the chart card, and every figure made
+  tappable (net-worth Cash/Stock chips → Cash/Stock, profit → period detail,
+  receivable/payable → receivables, plain-terms → stock ledger / bill / party).
+- `fl_chart 1.x` API notes: `getTooltipColor` (not `tooltipBgColor`),
+  `SideTitleWidget(meta:…, child:…)`, `getTitlesWidget: (value, meta) => …`.
+- Tests: `test/data/profit_series_test.dart` (two months → per-month bars, the Q3
+  quarterly total, and the drill-down ids), plus a chart/scope-toggle case added
+  to `test/widget/dashboard_screen_test.dart`.
+- Deferred to Phase 5: Supabase backup/sync, in-place bill *field* editing,
+  summary-image share, and a formal light/dark chart contrast re-check.
 
 **Phase 3 — Cash & Godam + Payments UI, DONE (built over the Phase-1 use-cases):**
 - Read layer: `data/local/cash_read_queries.dart` + `app/cash_read_providers.dart`
@@ -58,8 +87,8 @@ documented path is current for the machine you're on.
   transfers oldest-first + reconciliation; bounced-cheque reopens the bill in the
   read model). Also fixed a pre-existing Flutter-3.44 `ListTile`-in-`Container`
   assertion by wrapping the party/category picker lists in a transparent `Material`.
-- Deferred to Phase 4/5: fl_chart profit chart + dashboard drill-downs, in-place
-  bill *field* editing, Supabase backup/sync.
+- (The fl_chart profit chart + dashboard drill-downs were completed in Phase 4;
+  still deferred to Phase 5: in-place bill *field* editing, Supabase backup/sync.)
 
 **Phase 2 — daily-use UI, DONE (built on the Phase-1 domain core):**
 - Auth/gate: `security/pin_service.dart` (Admin + optional View PIN, deterministic
@@ -192,7 +221,7 @@ proportion to weight, so the average of what remains is provably unchanged.
   transaction; thin repos can wrap later without changing the invariant).
 - Riverpod providers/DI. All UI (presentation/ — Phase 2+), Supabase sync
   (Phase 5), PIN/security storage, receipt/summary sharing.
-- `compute_dashboard_summary` covers monthly scope; quarterly is a thin wrapper.
+- `compute_dashboard_summary` now covers monthly AND quarterly scope (Phase 4).
 - Forced-migration failure drill (schemaVersion bump + throwing onUpgrade).
 - Soft-delete/Trash repository mixin + UpdateHistory on in-place bill edits
   (schema is ready — `deletedAt`, `TrashRecord`, `UpdateHistory` tables exist).

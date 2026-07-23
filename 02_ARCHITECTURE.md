@@ -2,8 +2,9 @@
 
 > **Implementation status (2026-07-23)** — layers built: `core/`, `data/local/`
 > (Drift schema + AppDatabase + vaulting), `domain/` (services + all use-cases),
-> `security/`, and `presentation/` + `app/` through Phase 3 (theme, Riverpod DI,
-> Dashboard, Parties, Bills, Stock, Trash, Cash & Godam, Payments).
+> `security/`, and `presentation/` + `app/` through Phase 4 (theme, Riverpod DI,
+> Dashboard + analytics/`fl_chart` chart + drill-downs, Parties, Bills, Stock,
+> Trash, Cash & Godam, Payments).
 > **Documented deviations from this doc's §6, all deliberate:**
 > - **StockCategory** stores `quantityGrams` + **`totalCostBasisPaisa`** (both int),
 >   NOT an `avgCostPaisaPerGram` column. avgCost is *derived* on read — a per-gram
@@ -28,6 +29,13 @@
 >   drill-downable entries and runs the Godam FIFO trace (§3 "Cash overdraft
 >   check" / §6 `CashMovement`) at read time, exactly as this doc specifies:
 >   never a stored allocation table.
+> - **Phase-4 dashboard analytics are built and green.** No new persistence — the
+>   `fl_chart` profit-trend chart, Month/Quarter scope, receivables/payables view,
+>   and every number→source drill-down all read the same derived
+>   `compute_dashboard_summary` math (now with a `profitSeries()` bucketer and
+>   quarterly `periodBounds`); `DashboardSummary` carries drill-down ids only.
+>   Charts follow §5's `fl_chart` choice; colour is polarity-only and paired with
+>   text value labels so it is never the sole information channel.
 
 ## 1. App Flow (User-Level)
 

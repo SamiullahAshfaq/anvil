@@ -73,4 +73,52 @@ void main() {
     expect(await db.poolBalancePaisa((await db.poolByName(PoolNameDb.home)).id),
         5000000);
   });
+
+  testWidgets('profit chart + month/quarter scope toggle render and switch',
+      (tester) async {
+    final db = AppDatabase.memory();
+    addTearDown(db.close);
+    await db.customStatement('SELECT 1;');
+    final access = AccessController();
+
+    final scrap =
+        (await (db.select(db.stockCategories)..where((t) => t.name.equals('Scrap')))
+                .getSingle())
+            .id;
+    final buyer = newId();
+    await db.into(db.parties).insert(PartiesCompanion.insert(
+        id: buyer, name: 'Buyer', type: PartyTypeDb.both, createdAt: DateTime.now()));
+
+    final now = DateTime.now();
+    await RunDayZeroMigration(db: db, access: access).call(DayZeroInput(
+      date: DateTime(now.year, now.month, 1),
+      stockOpenings: [
+        StockOpening(
+            parentCategoryId: scrap, quantityGrams: 100000, ratePaisaPerKg: 4000),
+      ],
+    ));
+    await RecordSale(db: db, access: access).call(RecordSaleInput(
+      partyId: buyer,
+      date: now,
+      rateMode: RateModeDb.perBill,
+      billLevelRatePaisaPerKg: 6000,
+      lines: [SaleLineInput(parentCategoryId: scrap, weightGrams: 40000)],
+    ));
+
+    await tester.pumpWidget(ProviderScope(
+      overrides: [appDatabaseProvider.overrideWithValue(db)],
+      child: MaterialApp(theme: AppTheme.light(), home: const DashboardScreen()),
+    ));
+    await tester.pumpAndSettle();
+
+    // The trend chart card and the scope toggle are present, scoped to month.
+    await tester.scrollUntilVisible(find.text('Profit trend'), 200);
+    expect(find.text('Profit trend'), findsOneWidget);
+    expect(find.text('THIS MONTH'), findsOneWidget);
+
+    // Switching to Quarter re-labels the period section (same position figures).
+    await tester.tap(find.text('Quarter'));
+    await tester.pumpAndSettle();
+    expect(find.text('THIS QUARTER'), findsOneWidget);
+  });
 }
