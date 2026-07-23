@@ -79,22 +79,28 @@ class _CategoryPickerState extends ConsumerState<_CategoryPicker> {
                   loading: () =>
                       const Center(child: CircularProgressIndicator()),
                   error: (e, _) => Text('$e'),
-                  data: (list) => ListView(
-                    shrinkWrap: true,
-                    children: [
-                      for (final item in list)
-                        ListTile(
-                          title: Text(item.category.name,
-                              style: TextStyle(color: c.ink)),
-                          trailing: Text(
-                              item.position.quantityGrams == 0
-                                  ? ''
-                                  : '${(item.position.quantityGrams / 1000).toStringAsFixed(0)} kg',
-                              style: TextStyle(color: c.muted, fontSize: 12)),
-                          onTap: () => Navigator.of(context).pop(
-                              (id: item.category.id, name: item.category.name)),
-                        ),
-                    ],
+                  // Transparent Material so ListTile ink/splash has a Material
+                  // ancestor nearer than the coloured Container (Flutter asserts
+                  // on ListTile-inside-DecoratedBox).
+                  data: (list) => Material(
+                    type: MaterialType.transparency,
+                    child: ListView(
+                      shrinkWrap: true,
+                      children: [
+                        for (final item in list)
+                          ListTile(
+                            title: Text(item.category.name,
+                                style: TextStyle(color: c.ink)),
+                            trailing: Text(
+                                item.position.quantityGrams == 0
+                                    ? ''
+                                    : '${(item.position.quantityGrams / 1000).toStringAsFixed(0)} kg',
+                                style: TextStyle(color: c.muted, fontSize: 12)),
+                            onTap: () => Navigator.of(context).pop(
+                                (id: item.category.id, name: item.category.name)),
+                          ),
+                      ],
+                    ),
                   ),
                 ),
               ),

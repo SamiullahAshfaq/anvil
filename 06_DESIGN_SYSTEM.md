@@ -1,5 +1,13 @@
 # Design System — extracted & validated from the Claude Design prototype
 
+> **Implementation note (2026-07-23)** — the gaps listed in §5 below were
+> identified against the HTML prototype, not against built code. As of Phase 3,
+> items 1, 2, 3, 4, 5, 6, and 7 have all been implemented directly in Flutter
+> (following this doc's tokens) rather than first added back to the HTML
+> prototype — see the per-item notes in §5 and `04_PHASES.md`/`05_MEMORY.md` for
+> what actually shipped. The HTML prototype itself was not regenerated to match;
+> treat it as the original visual reference, not a live mirror of the app.
+
 ## Important note on the two design inputs you provided
 
 You gave two files. They are **not equivalent** and should not both be handed to a coder as-is:
@@ -85,16 +93,16 @@ The prototype's screen states map directly onto PRD §4 features:
 
 Being honest about gaps, since you asked what to include beyond what's there:
 
-1. **New Bill entry flow (the actual form)** — the prototype shows bill *detail/receipt* view states (`isBill`, `isExpense`) but the multi-line-item entry form itself (add line, pick category, tag sub-category, toggle per-bill/per-line rate) isn't fully fleshed out as an interaction — this needs real form design, not just a states list.
-2. **Stock Write-Off / Wastage entry screen** — not present in the prototype (this was added in the hardening pass, after the prototype was likely built). Needs a new screen: parent category picker, weight, absorb-vs-expense mode toggle.
-3. **Cash overdraft soft-warning UI** — not present. Needs the actual calm confirmation-sheet component ("Record Transfer Now" / "Continue Anyway").
-4. **Day-0 Migration / onboarding flow** — the `isPin` state suggests first-run PIN setup exists, but the guided opening-balances-and-stock entry flow isn't in the prototype. This is a multi-step onboarding wizard that needs its own screens.
-5. **Payment allocation UI** (many-to-many, manual) — needs a dedicated "select which bill(s) this payment settles" interaction; not clearly present as its own state.
-6. **Cash Flow Ledger (roznamcha) with filters** — the day-wise, filterable cash movement view (now PRD §4.5) isn't in the prototype; `isCash`/`isSpend` cover Godam-specific trace but not the full cross-pool filterable ledger described there.
-7. **Settlement history tab on Party Detail** — the unified advances+bills+payments timeline per party (now PRD §4.1) needs to be added to `isPartyDetail`. This matters especially for the bidirectional-balance case: a party can simultaneously have a standing receivable (they owe you from before) and an in-progress payable (you owe them for a current purchase) — the design must show both numbers clearly side by side, never silently netted into one figure.
-8. **Empty states** — no evidence of empty-state screens (new user, zero bills yet, zero stock) — these matter for first real use.
-9. **Error/validation states** — the calm-error-copy principle needs actual visual treatment (inline banner component) somewhere in the prototype; not clearly present as a distinct state.
-10. **Accessibility check on the chart** — PRD calls for "accessibility-validated colors" on the profit bar chart; worth explicitly re-checking contrast on the `monthlyBars` treatment before finalizing.
+1. **New Bill entry flow (the actual form)** — the prototype shows bill *detail/receipt* view states (`isBill`, `isExpense`) but the multi-line-item entry form itself (add line, pick category, tag sub-category, toggle per-bill/per-line rate) isn't fully fleshed out as an interaction — this needs real form design, not just a states list. **✅ Built (Phase 2)** — `presentation/bills/new_bill_screen.dart`.
+2. **Stock Write-Off / Wastage entry screen** — not present in the prototype (this was added in the hardening pass, after the prototype was likely built). Needs a new screen: parent category picker, weight, absorb-vs-expense mode toggle. **✅ Built (Phase 2)** — `presentation/stock/write_off_sheet.dart`.
+3. **Cash overdraft soft-warning UI** — not present. Needs the actual calm confirmation-sheet component ("Record Transfer Now" / "Continue Anyway"). **✅ Built (Phase 2/3)** — `showWarningsSheet` in `shared_widgets/calm_sheet.dart`, round-tripped from bill payments, standalone payments, and Godam transfers.
+4. **Day-0 Migration / onboarding flow** — the `isPin` state suggests first-run PIN setup exists, but the guided opening-balances-and-stock entry flow isn't in the prototype. This is a multi-step onboarding wizard that needs its own screens. **✅ Built (Phase 2)** — `presentation/onboarding/day_zero_screen.dart`.
+5. **Payment allocation UI** (many-to-many, manual) — needs a dedicated "select which bill(s) this payment settles" interaction; not clearly present as its own state. **✅ Built (Phase 3)** — `presentation/payments/new_payment_screen.dart` (new payment) and `allocate_advance_screen.dart` (existing advance).
+6. **Cash Flow Ledger (roznamcha) with filters** — the day-wise, filterable cash movement view (now PRD §4.5) isn't in the prototype; `isCash`/`isSpend` cover Godam-specific trace but not the full cross-pool filterable ledger described there. **✅ Built (Phase 3)** — `presentation/cash_godam/roznamcha_screen.dart` (pool/direction/party/expense-category/date-range filters, day-grouped with running balance).
+7. **Settlement history tab on Party Detail** — the unified advances+bills+payments timeline per party (now PRD §4.1) needs to be added to `isPartyDetail`. This matters especially for the bidirectional-balance case: a party can simultaneously have a standing receivable (they owe you from before) and an in-progress payable (you owe them for a current purchase) — the design must show both numbers clearly side by side, never silently netted into one figure. **✅ Built (Phase 2)** — the Settlement tab in `presentation/parties/party_detail_screen.dart`; Phase 3 added tap-to-reverse on payment rows there.
+8. **Empty states** — no evidence of empty-state screens (new user, zero bills yet, zero stock) — these matter for first real use. **Partially built** — e.g. `parties_screen.dart`'s `_Empty`, `godam_ledger_screen.dart`'s empty state; not yet audited across every screen.
+9. **Error/validation states** — the calm-error-copy principle needs actual visual treatment (inline banner component) somewhere in the prototype; not clearly present as a distinct state. **✅ Built (Phase 2)** — `showCalmError`/`showCalmInfo` in `shared_widgets/calm_sheet.dart` + `core/errors/error_copy.dart`.
+10. **Accessibility check on the chart** — PRD calls for "accessibility-validated colors" on the profit bar chart; worth explicitly re-checking contrast on the `monthlyBars` treatment before finalizing. **⬜ Still outstanding** — the `fl_chart` profit chart itself isn't built yet (Phase 4).
 
 ## 6. Recommendation
 

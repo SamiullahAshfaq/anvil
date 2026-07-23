@@ -1,0 +1,443 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"in",
+				"infer"
+			],
+			[
+				"bo",
+				"boxes"
+			],
+			[
+				"ro",
+				"rows"
+			],
+			[
+				"col",
+				"colElem"
+			],
+			[
+				"a",
+				"add"
+			],
+			[
+				"pr",
+				"product"
+			],
+			[
+				"pro",
+				"productExceptSelf"
+			],
+			[
+				"re",
+				"return"
+			],
+			[
+				"de",
+				"defaultdict"
+			],
+			[
+				"has",
+				"hashmap"
+			],
+			[
+				"def",
+				"defaultdict"
+			],
+			[
+				"find",
+				"findKthLargest"
+			]
+		]
+	},
+	"buffers":
+	[
+	],
+	"build_system": "",
+	"build_system_choices":
+	[
+	],
+	"build_varint": "",
+	"command_palette":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+			[
+				"clo",
+				"Project: Close"
+			],
+			[
+				"insta",
+				"Package Control: Install Package"
+			],
+			[
+				"close",
+				"Project: Close"
+			],
+			[
+				"remove",
+				"Package Control: Remove Package"
+			],
+			[
+				"install",
+				"Package Control: Install Package"
+			],
+			[
+				"adap",
+				"Debugger: Install Adapters"
+			],
+			[
+				"debugger adap",
+				"Debugger: Install Adapters"
+			],
+			[
+				"debugger sta",
+				"Debugger: Install Adapters"
+			],
+			[
+				"deb",
+				"Debugger: Open"
+			],
+			[
+				"start",
+				"Debugger: Start (no debug)"
+			],
+			[
+				"de",
+				"Debugger: Open"
+			],
+			[
+				"debugger se",
+				"Preferences: Debugger Settings"
+			],
+			[
+				"debugger setti",
+				"Preferences: Debugger Settings"
+			],
+			[
+				"debigg",
+				"Debugger: Edit Configurations"
+			],
+			[
+				"debu",
+				"Debugger: Open"
+			],
+			[
+				"ins",
+				"Package Control: Install Package"
+			],
+			[
+				"adao",
+				"Debugger: Add or Select Configuration"
+			],
+			[
+				"ada",
+				"Debugger: Install Adapters"
+			],
+			[
+				"insa",
+				"Debugger: Install Adapters"
+			],
+			[
+				"sleect con",
+				"Debugger: Add or Select Configuration"
+			],
+			[
+				"select",
+				"Debugger: Add or Select Configuration"
+			],
+			[
+				"debugger",
+				"Debugger: Edit Configurations"
+			],
+			[
+				"remo",
+				"Package Control: Remove Package"
+			],
+			[
+				"select con",
+				"Debugger: Add or Select Configuration"
+			],
+			[
+				"debug",
+				"Debugger: Open"
+			],
+			[
+				"instal",
+				"Debugger: Install Adapters"
+			],
+			[
+				"ayu",
+				"ayu: Activate theme"
+			],
+			[
+				"side",
+				"View: Toggle Open Files in Side Bar"
+			],
+			[
+				"termi",
+				"Terminus: Open Default Shell in Tab (View)"
+			],
+			[
+				"ter",
+				"Terminus: Toggle Panel"
+			],
+			[
+				"rem",
+				"Package Control: Remove Package"
+			],
+			[
+				"install ",
+				"Package Control: Install Package"
+			],
+			[
+				"remove ",
+				"Package Control: Remove Package"
+			],
+			[
+				" install pa",
+				"Package Control: Install Package"
+			]
+		],
+		"width": 0.0
+	},
+	"console":
+	{
+		"height": 178.0,
+		"history":
+		[
+			"echo \"Hello\""
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"expanded_folders":
+	[
+		"/home/samiullah/Documents/anvil"
+	],
+	"file_history":
+	[
+		"/data/neetcode/Main.java",
+		"/data/neetcode/practice.py",
+		"/data/neetcode/neetcode.sublime-project",
+		"/data/neetcode/longestConsecutiveSequence.py",
+		"/data/neetcode/productOfArrayExceptSelf.py",
+		"/data/neetcode/validSudoku.py",
+		"/home/samiullah/.cache/sublime-text/Package Storage/Debugger/adapters.json",
+		"/home/samiullah/.cache/sublime-text/Package Storage/Debugger/debugpy/debugpy_info.json",
+		"/data/neetcode/kFrequent.sublime-project",
+		"/data/neetcode/topKfrequentElements.py",
+		"/data/neetcode/kthLargestElement.py",
+		"/data/kthLargestElement.py",
+		"/data/script.py",
+		"/home/samiullah/.config/sublime-text/Packages/User/Python3.sublime-build"
+	],
+	"find":
+	{
+		"height": 37.0
+	},
+	"find_in_files":
+	{
+		"height": 0.0,
+		"where_history":
+		[
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+		],
+		"reverse": false,
+		"scrollbar_highlights": true,
+		"show_context": true,
+		"use_buffer2": true,
+		"use_gitignore": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"sheets":
+			[
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 37.0
+	},
+	"input":
+	{
+		"height": 0.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.Debugger":
+	{
+		"height": 382.0,
+		"history":
+		[
+		]
+	},
+	"output.Debugger Console":
+	{
+		"height": 382.0,
+		"history":
+		[
+		]
+	},
+	"output.LSP Log Panel":
+	{
+		"height": 0.0,
+		"history":
+		[
+		]
+	},
+	"output.Terminus":
+	{
+		"height": 375.0,
+		"history":
+		[
+		]
+	},
+	"output.diagnostics":
+	{
+		"height": 0.0,
+		"history":
+		[
+		]
+	},
+	"output.exec":
+	{
+		"height": 245.0,
+		"history":
+		[
+		]
+	},
+	"output.find_results":
+	{
+		"height": 0.0,
+		"history":
+		[
+		]
+	},
+	"output.mdpopups":
+	{
+		"height": 0.0,
+		"history":
+		[
+		]
+	},
+	"pinned_build_system": "Packages/User/Python3.sublime-build",
+	"project": "anvil.sublime-project",
+	"replace":
+	{
+		"height": 70.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_symbol":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"selected_group": 0,
+	"settings":
+	{
+		"copilot.conversation.code_block_index":
+		{
+		},
+		"copilot.conversation.conversation_entries":
+		[
+		],
+		"copilot.conversation.conversation_id": "",
+		"copilot.conversation.follow_up": "",
+		"copilot.conversation.group_id": -1,
+		"copilot.conversation.is_visible": false,
+		"copilot.conversation.is_waiting": false,
+		"copilot.conversation.last_active_view_id": -1,
+		"copilot.conversation.original_layout": null,
+		"copilot.conversation.reference_block_state":
+		{
+		},
+		"copilot.conversation.suggested_title": "",
+		"copilot.conversation.view_id": -1,
+		"copilot.copilotignore.patterns":
+		{
+		},
+		"lsp_show_inlay_hints": false
+	},
+	"show_minimap": true,
+	"show_open_files": false,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 301.0,
+	"status_bar_visible": true,
+	"template_settings":
+	{
+	}
+}

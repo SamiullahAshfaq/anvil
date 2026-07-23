@@ -2,25 +2,32 @@
 
 These rules exist because the first build technically "passed tests" while missing the actual business logic. Passing tests is not the goal — **matching real business behavior** is. Read the PRD and Architecture docs first; this file governs *how* to build what's specified there.
 
-> **Compliance status (2026-07-22)** — domain/use-case layer + Phase-2 UI follow
-> these rules, proven by 53 tests: domain-first with tests before UI (§1.1);
+> **Compliance status (2026-07-23)** — domain/use-case layer + Phase-2/3 UI follow
+> these rules, proven by 55 tests: domain-first with tests before UI (§1.1);
 > one-use-case-one-transaction (§1.2); derived balances (§1.3); moving-average
 > with zero/negative reset (§1.4); per-bill/per-line rate (§1.5, in New Bill);
-> soft stock validation (§1.6, calm warning sheet); inline sub-categories +
-> inline custom parent category (§1.9); parent-only costing (§1.16); integer
-> Paisa/Grams, no floats (§1.18, §2.14); UUIDv4 keys (§1.17); advance-allocation
-> no-duplicate-CashMovement guard (§1.20, regression-tested); dynamic Godam FIFO
-> (§1.21); View-mode enforced in use-cases AND UI (§1.22, widget-tested);
-> write-off both modes (§1.23, in UI); non-destructive reversal (§1.24, use-case);
-> overdraft soft-warning (§1.25, round-tripped in UI); Day-0 as dated entries
-> (§1.26, wizard); pre-migration vaulting (§1.27); **soft-delete → Trash + restore
-> (§1.11, `manage_trash`, bill delete replays the ledger to keep stock exact);
-> UpdateHistory on party edits (§1.12/§1.19); centralized calm-error copy
-> (§4, `core/errors/error_copy.dart`)**. **Still outstanding**: CI (§3);
-> UpdateHistory on in-place *bill* edits (§1.19 — bill field-edit UI not built,
-> Trash+re-enter used instead); photo capture + photo-path sync exclusion test
-> (§1.10 — no sync layer yet); 30-day auto-purge execution (Trash shows the
-> countdown; purge is Phase 5).
+> soft stock validation (§1.6, calm warning sheet); **manual many-to-many payment
+> allocation (§1.7, `new_payment_screen`/`allocate_advance_screen` — user picks
+> bills and amounts, no auto-FIFO)**; **Godam FIFO traceability with "view
+> source" from any spend (§1.8, `godam_ledger_screen`'s trace sheet)**; inline
+> sub-categories + inline custom parent category (§1.9); parent-only costing
+> (§1.16); integer Paisa/Grams, no floats (§1.18, §2.14); UUIDv4 keys (§1.17);
+> advance-allocation no-duplicate-CashMovement guard (§1.20, regression-tested in
+> Phase 1 **and exercised end-to-end by the Phase-3 UI + `cash_read_test.dart`**);
+> dynamic Godam FIFO (§1.21, now also read-modeled in `cash_read_providers.dart`
+> for the UI); View-mode enforced in use-cases AND UI (§1.22, widget-tested);
+> write-off both modes (§1.23, in UI); **non-destructive reversal (§1.24, now
+> reachable from the Party Detail settlement timeline via
+> `reverse_payment_sheet`, not just the use-case)**; overdraft soft-warning
+> (§1.25, round-tripped in UI across bill payments, standalone payments, AND
+> Godam transfers); Day-0 as dated entries (§1.26, wizard); pre-migration
+> vaulting (§1.27); soft-delete → Trash + restore (§1.11, `manage_trash`, bill
+> delete replays the ledger to keep stock exact); UpdateHistory on party edits
+> (§1.12/§1.19); centralized calm-error copy (§4, `core/errors/error_copy.dart`).
+> **Still outstanding**: CI (§3); UpdateHistory on in-place *bill* edits (§1.19 —
+> bill field-edit UI not built, Trash+re-enter used instead); photo capture +
+> photo-path sync exclusion test (§1.10 — no sync layer yet); 30-day auto-purge
+> execution (Trash shows the countdown; purge is Phase 5).
 
 ## 1. What To Do
 

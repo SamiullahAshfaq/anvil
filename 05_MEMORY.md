@@ -67,7 +67,7 @@ Multi-device real-time sync, multi-currency, barcode/QR scanning, GST/tax filing
 ## Definition of Done (the actual bar, not test-count)
 Not "tests pass" or "builds clean" — the bar is: **hand-trace a real day/month from the owner's manual register through the app and get matching numbers.** See `04_PHASES.md` exit criteria per phase — each phase has a real-numbers validation step, not just a green CI badge.
 
-## Current Implementation Status (2026-07-22)
+## Current Implementation Status (2026-07-23)
 - **Phase 0 ✅ DONE** — Drift schema (13 tables, UUIDv4, integer Paisa/Grams),
   `AppDatabase` + seeding (3 pools / 3 stock cats / 6 expense cats incl. Wastage),
   `DbVault` pre-migration copy/restore/prune. Outstanding: CI, forced-migration drill.
@@ -90,15 +90,24 @@ Not "tests pass" or "builds clean" — the bar is: **hand-trace a real day/month
   inverse; proven by hand-traced tests. Deferred to Phase 3: standalone
   payment-recording + manual-allocation UI, Payment-Reversal UI, Cash & Godam +
   Roznamcha screens, in-place bill *field* editing.
-- **Phases 3–6 ⬜ NOT STARTED** (though most Phase-3 use-cases already exist).
+- **Phase 3 ✅ DONE (2026-07-23)** — Cash & Godam + Payments UI over the Phase-1
+  use-cases: cash pool screen + reconciliation, Transfer-to-Godam, Godam FIFO
+  ledger with two-tap spend-trace, filterable day-grouped Roznamcha, standalone
+  payment recording + manual allocation, allocate-existing-advance, and the
+  non-destructive payment-reversal/bounce flow. New derived read layer
+  (`cash_read_queries` + `cash_read_providers`). 55 tests green.
+- **Phases 4–6 ⬜ NOT STARTED** (Phase-4 net-worth/P&L math already done in Phase 1).
 
 **Documented deviations from `02_ARCHITECTURE.md` §6** (all deliberate, for
 integer-exactness): StockCategory stores `quantityGrams` + `totalCostBasisPaisa`
 (avgCost derived, not a stored per-gram column); rates stored as `ratePaisaPerKg`;
 Bill has an added `isOpening` flag; repository layer deferred (use-cases hit
-`AppDatabase` directly, one-txn invariant preserved). Flutter SDK at
-`/home/sami/Android/flutter` (not on PATH). Host tests need `test/sqlite_loader.dart`
-(libsqlite3.so.0). See `CLAUDE.md` for the file-by-file map.
+`AppDatabase` directly, one-txn invariant preserved). Flutter SDK path/version is
+**machine-specific** (this project has been worked on from more than one
+machine) — check `CLAUDE.md` §Commands for the locations seen so far, but always
+confirm with `which flutter`/`flutter --version` locally rather than assuming.
+Host tests need `test/sqlite_loader.dart` (libsqlite3.so.0). See `CLAUDE.md` for
+the file-by-file map.
 
 ## Update Log
 *(Append entries here as the project progresses — decisions made, scope changes, things learned mid-build that future sessions should know without re-discovering.)*
@@ -133,4 +142,38 @@ Bill has an added `isOpening` flag; repository layer deferred (use-cases hit
   widget test). `flutter analyze lib test` clean. Deferred (Phase 3): standalone
   payment/allocation UI, reversal UI, Cash & Godam + Roznamcha, in-place bill
   field editing. Fonts still fall back (TTFs not bundled).
+- **2026-07-23 (Phase 3 completed — Cash & Godam + Payments UI)**: Built the
+  Phase-3 presentation layer over the already-tested Phase-1 money-movement
+  use-cases. New derived read layer: `data/local/cash_read_queries.dart` +
+  `app/cash_read_providers.dart` — resolves raw `CashMovement` rows into labelled
+  `CashLedgerEntry`s (transfer/sale-receipt/purchase-payment/expense/payment/
+  reversal/opening), computes the Godam FIFO spend-trace at read time via
+  `CashTraceService`, and exposes open-bills-per-party + unallocated-advances +
+  reconciliation, all recomputed on `ledgerRevision`. Screens
+  (`presentation/cash_godam/`): `cash_screen` (dark total-cash card, pool cards,
+  reconciliation), `transfer_sheet` (Home/Bank→Godam with overdraft round-trip),
+  `godam_ledger_screen` (fundings/spends; tap a spend → "where this money came
+  from" FIFO sheet naming the funding transfers + View bill), `roznamcha_screen`
+  (day-grouped, per-day net + running end-of-day balance, filters: pool /
+  direction / party / expense-category / date-range), `cash_entry_tile` (shared
+  row). `presentation/payments/`: `new_payment_screen` (standalone payment,
+  direction, pool, manual allocation against open bills of the matching kind —
+  received→sale, paid→purchase — remainder = advance), `allocate_advance_screen`
+  (place an existing advance via `AllocatePayment` = PaymentAllocation only, no
+  duplicate CashMovement), `reverse_payment_sheet` (non-destructive bounce flow,
+  reached from the Party Detail settlement timeline). Wired "Cash & Godam" into
+  the drawer and a Record-payment / Allocate-advance / Reverse menu into Party
+  Detail. **55 tests green** (added `test/data/cash_read_test.dart`: a Godam spend
+  traced to its two funding transfers oldest-first + reconciliation, and a
+  bounced-cheque end-to-end where the bill reopens with full outstanding and a
+  reversal appears on the Roznamcha). `flutter analyze lib test` clean. This
+  session ran on a machine with Flutter 3.44.7 at `/home/samiullah/Android/flutter`
+  (a newer SDK than the 3.41.1 previously recorded at `/home/sami/Android/flutter`
+  — the project is worked on from more than one machine, see the SDK note in
+  `CLAUDE.md` §Commands). That newer SDK surfaced a **pre-existing** failure
+  unrelated to Phase 3: a `ListTile` inside a coloured `Container` now asserts, so
+  the party- and category-pickers' lists were wrapped in a transparent `Material`
+  to fix it for good, regardless of SDK version. Deferred to Phase 4/5: fl_chart
+  profit chart + dashboard drill-downs, in-place bill *field* editing, and
+  Supabase backup/sync.
 - **2026-07-22 (first code — Phases 0, 1, and start of 2)**: Scaffolded the Flutter project (`flutter create`, org `com.godamledger`) with the approved dependency set. Built and test-proved **Phase 0** (Drift schema + seeding + `DbVault` pre-migration vaulting) and all of **Phase 1** (the 5 domain services and every use-case, including `run_day_zero_migration` and `compute_dashboard_summary`). Started **Phase 2**: design-system theme, Riverpod DI, app shell, and the Dashboard screen with a widget test. **47 tests pass; `flutter analyze lib test` clean.** Recorded deliberate schema deviations for integer-exactness (StockCategory `quantityGrams`+`totalCostBasisPaisa` with derived avgCost; `ratePaisaPerKg`; Bill `isOpening` flag) and deferred the repository layer (use-cases hit `AppDatabase` directly, one-transaction invariant preserved). Validation highlight: a hand-traced day-0-plus-a-month scenario where net worth increases by exactly the period profit — evidence the whole ledger is internally consistent. See per-doc status banners (added this session) and `CLAUDE.md` for the file map.

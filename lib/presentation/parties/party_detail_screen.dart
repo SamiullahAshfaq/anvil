@@ -10,6 +10,9 @@ import '../../data/local/tables.dart';
 import '../../domain/entities/party_ledger.dart';
 import '../../security/access_mode.dart';
 import '../bills/new_bill_screen.dart';
+import '../payments/allocate_advance_screen.dart';
+import '../payments/new_payment_screen.dart';
+import '../payments/reverse_payment_sheet.dart';
 import '../shared_widgets/amount_text.dart';
 import '../shared_widgets/app_card.dart';
 import '../shared_widgets/calm_sheet.dart';
@@ -53,14 +56,30 @@ class PartyDetailScreen extends ConsumerWidget {
             title: Text(d.party.name),
             actions: [
               if (!isView)
-                IconButton(
-                  icon: const Icon(Icons.edit_outlined),
-                  onPressed: () => showEditPartySheet(context, ref, d.party),
-                ),
-              if (!isView)
-                IconButton(
-                  icon: const Icon(Icons.delete_outline),
-                  onPressed: () => _delete(context, ref),
+                PopupMenuButton<String>(
+                  icon: const Icon(Icons.more_vert),
+                  onSelected: (v) {
+                    switch (v) {
+                      case 'payment':
+                        openNewPayment(context, ref, partyId: partyId);
+                      case 'allocate':
+                        Navigator.of(context).push(MaterialPageRoute(
+                            builder: (_) =>
+                                AllocateAdvanceScreen(partyId: partyId)));
+                      case 'edit':
+                        showEditPartySheet(context, ref, d.party);
+                      case 'delete':
+                        _delete(context, ref);
+                    }
+                  },
+                  itemBuilder: (_) => const [
+                    PopupMenuItem(
+                        value: 'payment', child: Text('Record payment')),
+                    PopupMenuItem(
+                        value: 'allocate', child: Text('Allocate advance')),
+                    PopupMenuItem(value: 'edit', child: Text('Edit party')),
+                    PopupMenuItem(value: 'delete', child: Text('Move to Trash')),
+                  ],
                 ),
             ],
             bottom: const TabBar(tabs: [
@@ -81,7 +100,7 @@ class PartyDetailScreen extends ConsumerWidget {
               _BalanceHeader(balance: d.balance, party: d.party),
               Expanded(
                 child: TabBarView(children: [
-                  _SettlementTab(detail: d),
+                  _SettlementTab(detail: d, isView: isView),
                   _HistoryTab(detail: d),
                 ]),
               ),
@@ -164,19 +183,31 @@ class _StatBox extends StatelessWidget {
 
 /// A unified, chronological view of every bill and payment for the party
 /// (01_PRD.md §4.1 settlement history) — receivable and payable never netted.
-class _SettlementTab extends StatelessWidget {
+class _SettlementTab extends ConsumerWidget {
   final PartyDetail detail;
-  const _SettlementTab({required this.detail});
+  final bool isView;
+  const _SettlementTab({required this.detail, required this.isView});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final c = context.c;
     final events = <_Event>[];
     for (final b in detail.bills) {
       events.add(_Event.bill(b));
     }
     for (final p in detail.payments) {
-      events.add(_Event.payment(p.payment));
+      final payment = p.payment;
+      final canReverse = !isView && !payment.reversed;
+      events.add(_Event.payment(
+        payment,
+        onTap: canReverse
+            ? () async {
+                final reversed =
+                    await showReversePaymentSheet(context, ref, payment);
+                if (reversed) ref.invalidate(partyDetailProvider(detail.party.id));
+              }
+            : null,
+      ));
     }
     events.sort((a, b) => b.date.compareTo(a.date));
     if (events.isEmpty) {
@@ -261,7 +292,7 @@ class _Event {
     });
   }
 
-  factory _Event.payment(Payment p) {
+  factory _Event.payment(Payment p, {VoidCallback? onTap}) {
     final received = p.direction == PaymentDirectionDb.received;
     return _Event(p.date, (context) {
       final c = context.c;
@@ -275,6 +306,7 @@ class _Event {
         child: AppCard(
           radius: AppRadius.secondary,
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          onTap: onTap,
           child: Row(
             children: [
               Icon(Icons.payments_outlined,

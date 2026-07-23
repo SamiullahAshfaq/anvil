@@ -259,20 +259,26 @@ class _PartyPickerState extends ConsumerState<_PartyPicker> {
                             style: TextStyle(color: c.muted)),
                       );
                     }
-                    return ListView(
-                      shrinkWrap: true,
-                      children: [
-                        for (final p in filtered)
-                          ListTile(
-                            leading: PartyAvatar(p.party.name, size: 36),
-                            title: Text(p.party.name,
-                                style: TextStyle(color: c.ink)),
-                            subtitle: Text(partyTypeLabel(p.party.type),
-                                style: TextStyle(color: c.muted, fontSize: 12)),
-                            onTap: () =>
-                                Navigator.of(context).pop(p.party.id),
-                          ),
-                      ],
+                    // Wrap in a transparent Material so ListTile ink/splash has
+                    // a Material ancestor nearer than the coloured Container
+                    // (Flutter asserts on ListTile-inside-DecoratedBox).
+                    return Material(
+                      type: MaterialType.transparency,
+                      child: ListView(
+                        shrinkWrap: true,
+                        children: [
+                          for (final p in filtered)
+                            ListTile(
+                              leading: PartyAvatar(p.party.name, size: 36),
+                              title: Text(p.party.name,
+                                  style: TextStyle(color: c.ink)),
+                              subtitle: Text(partyTypeLabel(p.party.type),
+                                  style: TextStyle(color: c.muted, fontSize: 12)),
+                              onTap: () =>
+                                  Navigator.of(context).pop(p.party.id),
+                            ),
+                        ],
+                      ),
                     );
                   },
                 ),

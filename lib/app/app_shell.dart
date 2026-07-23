@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/theme/app_colors.dart';
 import '../presentation/bills/bills_screen.dart';
+import '../presentation/cash_godam/cash_screen.dart';
 import '../presentation/home_dashboard/dashboard_screen.dart';
 import '../presentation/onboarding/day_zero_screen.dart';
 import '../presentation/parties/parties_screen.dart';
@@ -17,6 +18,7 @@ enum _Destination {
   parties('Parties', Icons.people_outline),
   bills('Bills', Icons.receipt_long_outlined),
   stock('Stock', Icons.inventory_2_outlined),
+  cash('Cash & Godam', Icons.account_balance_wallet_outlined),
   trash('Trash', Icons.delete_outline);
 
   const _Destination(this.label, this.icon);
@@ -28,6 +30,7 @@ enum _Destination {
         _Destination.parties => const PartiesScreen(),
         _Destination.bills => const BillsScreen(),
         _Destination.stock => const StockScreen(),
+        _Destination.cash => const CashScreen(),
         _Destination.trash => const TrashScreen(),
       };
 }

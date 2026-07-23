@@ -1,9 +1,10 @@
 # Architecture
 
-> **Implementation status (2026-07-22)** — layers built: `core/`, `data/local/`
+> **Implementation status (2026-07-23)** — layers built: `core/`, `data/local/`
 > (Drift schema + AppDatabase + vaulting), `domain/` (services + all use-cases),
-> `security/`, and the start of `presentation/` + `app/` (theme, Riverpod DI,
-> Dashboard). **Documented deviations from this doc's §6, all deliberate:**
+> `security/`, and `presentation/` + `app/` through Phase 3 (theme, Riverpod DI,
+> Dashboard, Parties, Bills, Stock, Trash, Cash & Godam, Payments).
+> **Documented deviations from this doc's §6, all deliberate:**
 > - **StockCategory** stores `quantityGrams` + **`totalCostBasisPaisa`** (both int),
 >   NOT an `avgCostPaisaPerGram` column. avgCost is *derived* on read — a per-gram
 >   average isn't integer-exact for common rates (Rs 55/kg = 5.5 p/g), and floats
@@ -21,6 +22,12 @@
 >   moving-average. The **sync layer** (Supabase backup/restore) is still not built.
 > - Phase-2 presentation layer is built and green (see `CLAUDE.md`); read models
 >   live in `data/local/read_queries.dart` + `app/read_providers.dart`.
+> - **Phase-3 presentation layer (Cash & Godam, Payments) is built and green.**
+>   A second derived read layer — `data/local/cash_read_queries.dart` +
+>   `app/cash_read_providers.dart` — resolves `CashMovement` rows into labelled,
+>   drill-downable entries and runs the Godam FIFO trace (§3 "Cash overdraft
+>   check" / §6 `CashMovement`) at read time, exactly as this doc specifies:
+>   never a stored allocation table.
 
 ## 1. App Flow (User-Level)
 
@@ -155,6 +162,7 @@ lib/
 │   ├── bills/                        # new_bill_screen.dart with type switch, receipt_screen.dart
 │   ├── stock/
 │   ├── cash_godam/
+│   ├── payments/                     # new_payment_screen, allocate_advance_screen, reverse_payment_sheet
 │   ├── trash/
 │   ├── backup_sync/
 │   └── shared_widgets/               # pill_button, calm_error_banner, amount_text, hairline_divider

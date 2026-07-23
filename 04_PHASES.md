@@ -2,11 +2,12 @@
 
 Ordering principle: **correctness of the financial core before UI breadth, and domain-layer tests before screens.** Each phase should end with something genuinely verifiable against a real numeric example from the owner's actual business, not just "tests green."
 
-> **Implementation status (as of 2026-07-22)** — 53 tests green, `flutter analyze lib test` clean.
+> **Implementation status (as of 2026-07-23)** — 55 tests green, `flutter analyze lib test` clean.
 > - **Phase 0 — ✅ DONE** (except CI wiring + the deliberate forced-migration-failure drill).
 > - **Phase 1 — ✅ DONE.** All services + all use-cases + dashboard summary built and unit/integration-tested, including a hand-traced day-0-plus-a-month scenario where net worth grows by exactly the period profit.
 > - **Phase 2 — ✅ DONE (daily-use core usable end-to-end).** Onboarding + PIN lock + View-mode + Day-0 wizard, Parties (list/detail/settlement/edit-with-UpdateHistory), New Bill (Purchase/Sale/Expense, per-bill/per-line rate, inline sub-category + custom parent category, soft stock/overdraft warnings), Bills list + Pending filter, Bill detail + branded-image receipt share, Stock (cards, recommended-rate explainer, ledger drill-down + sub-tag filter, write-off), and Trash (soft-delete + restore, ledger-replay stock rebuild). Deferred to their own phases: standalone Payment recording + manual allocation UI, Payment Reversal UI, and in-place bill *field* editing (all Phase 3 / later — bills carry inline payments today, and a mistaken bill is corrected via Trash+re-enter). Fonts still fall back until TTFs are bundled.
-> - **Phases 3–6 — ⬜ NOT STARTED** (most Phase-3 use-cases already exist from Phase 1).
+> - **Phase 3 — ✅ DONE (2026-07-23).** Cash & Godam screen + reconciliation, Transfer-to-Godam, Godam FIFO ledger with two-tap spend-trace, Roznamcha (filterable, day-grouped), standalone Payment recording + manual allocation, Allocate-existing-advance, and the Payment-Reversal/bounce flow — all UI over the Phase-1 use-cases, plus the `cash_read_providers` derived read layer. 55 tests green (added `cash_read_test.dart`); this session's machine ran a newer Flutter SDK than previously recorded (see `CLAUDE.md` §Commands) which surfaced a pre-existing `ListTile`-in-`Container` assertion in the party/category pickers, fixed for good regardless of SDK version.
+> - **Phases 4–6 — ⬜ NOT STARTED** (Phase 4 dashboard math already partially done from Phase 1).
 >
 > See `05_MEMORY.md` Update Log for the running detail and the documented schema deviations.
 
@@ -45,18 +46,19 @@ Ordering principle: **correctness of the financial core before UI breadth, and d
 - Access-mode enforcement (`UnauthorizedException` at the use-case layer) verified from the first mutating screen — confirm a View-PIN session genuinely cannot mutate data even if a button were mistakenly left visible.
 - **Exit criteria**: owner can log a real day's purchases and sales in the app, side-by-side with his manual register, and every number matches — including onboarding his actual current opening position via Day-0 Migration rather than starting from zero.
 
-## Phase 3 — Cash & Godam, Payments — ⬜ NOT STARTED
+## Phase 3 — Cash & Godam, Payments — ✅ DONE
 **Goal**: Money movement is fully tracked and traceable.
-*(Note: the underlying use-cases — transfer_to_godam, payment recording/allocation, reversal, and the dynamic Godam FIFO trace — are already built and tested in Phase 1. This phase is the UI over them.)*
-- Cash pool screens (Home/Bank/Godam balances).
-- Transfer-to-Godam flow.
-- **Cash overdraft soft-warning** wired into every withdrawal path (bill payment, expense, Godam spend) with "Record Transfer Now" / "Continue Anyway" actions.
-- Payment recording + manual allocation UI (many-to-many against open bills), **explicitly verified that allocating an existing advance never creates a duplicate CashMovement**.
-- **Payment Reversal / Bounce flow**: UI to reverse a payment, reopening affected bills and logging the reversal note, without ever deleting the original record.
-- Godam ledger with dynamic FIFO spend-trace ("view source" from any spend).
-- **Cash Flow Ledger (Roznamcha) screen**: day-wise, filterable (by pool, direction, party, expense category, date range) view of all cash movements across Home/Bank/Godam combined.
-- Cash reconciliation view.
-- **Exit criteria**: owner can answer "where did this Godam expense's money come from" in the app in 2 taps, and it matches his own memory/records of the transfer. A simulated bounced-cheque scenario is run end-to-end and the party ledger clearly shows the reversal note.
+*(Note: the underlying use-cases — transfer_to_godam, payment recording/allocation, reversal, and the dynamic Godam FIFO trace — were already built and tested in Phase 1. This phase is the UI over them, plus the cash read-model layer.)*
+- Cash pool screens (Home/Bank/Godam balances) — `presentation/cash_godam/cash_screen.dart` (dark total-cash card + pool cards + reconciliation figure).
+- Transfer-to-Godam flow — `cash_godam/transfer_sheet.dart` (source pool, amount, date; overdraft round-trip via `runWithConfirm`).
+- **Cash overdraft soft-warning** wired into every withdrawal path: bill payment/expense (New Bill), standalone payment (`paid`), and Godam transfer — all via the shared `NeedsConfirmation` → `showWarningsSheet` round-trip.
+- Payment recording + manual allocation UI — `presentation/payments/new_payment_screen.dart` (direction, amount, pool, allocate against open bills of the matching kind; remainder = advance). Allocating an existing advance — `payments/allocate_advance_screen.dart` — goes through `AllocatePayment` (PaymentAllocation only, **no duplicate CashMovement**, regression-tested in Phase 1 + exercised by the read-model test).
+- **Payment Reversal / Bounce flow** — `payments/reverse_payment_sheet.dart`, opened by tapping a payment in the Party Detail settlement timeline; reopens bills + logs the note, never deletes.
+- Godam ledger with dynamic FIFO spend-trace — `cash_godam/godam_ledger_screen.dart`; tapping a spend opens a "where this money came from" sheet naming the funding transfer(s) and offering "View bill".
+- **Cash Flow Ledger (Roznamcha) screen** — `cash_godam/roznamcha_screen.dart`: day-wise grouping with per-day net + running end-of-day balance, filterable by pool, direction, party, expense category, and date range (all/today/week/month); every row drills to its source bill/party.
+- Cash reconciliation view — `reconciliationProvider` (three pools + total = cash on hand), surfaced on the Cash screen.
+- Read layer: `data/local/cash_read_queries.dart` + `app/cash_read_providers.dart` (resolves movements to labelled `CashLedgerEntry`s, Godam FIFO trace, open bills / advances per party, reconciliation) — all derived, recomputed on `ledgerRevision`.
+- **Exit criteria met**: a Godam spend's funding is answerable in two taps (open Godam ledger → tap the spend), proven by `test/data/cash_read_test.dart` (a spend traced to its two funding transfers, oldest-first); a bounced-cheque scenario is run end-to-end and the bill reopens with full outstanding + a reversal entry on the Roznamcha and a note on the party ledger.
 
 ## Phase 4 — Dashboard & Analytics — 🚧 PARTIAL
 **Goal**: Month-end trust — the app replaces the manual register for decision-making.

@@ -28,8 +28,38 @@ wrong, the app has failed regardless of how it looks.
 - Domain logic lives in `lib/domain/` and is unit-tested with plain fixtures,
   independent of UI and DB, **before** any screen.
 
-## Current state (Phase 0–2 done) — 53 tests passing
+## Current state (Phase 0–3 done) — 55 tests passing
 Run `flutter test` (all green) and `flutter analyze lib test` (clean).
+SDK note: the Flutter install path and version are **machine-specific** — this
+repo has been worked on from more than one machine, and the SDK path/version
+under §Commands below reflects whichever machine last confirmed it. Always
+verify locally (`which flutter`, `flutter --version`) rather than assuming the
+documented path is current for the machine you're on.
+
+**Phase 3 — Cash & Godam + Payments UI, DONE (built over the Phase-1 use-cases):**
+- Read layer: `data/local/cash_read_queries.dart` + `app/cash_read_providers.dart`
+  — resolves `CashMovement` rows into labelled `CashLedgerEntry`s, computes the
+  Godam FIFO spend-trace at read time (`CashTraceService`), and exposes
+  open-bills-per-party, unallocated-advances, and reconciliation; all recompute on
+  `ledgerRevisionProvider`.
+- Screens (`presentation/cash_godam/`): `cash_screen` (total-cash card + pool cards
+  + reconciliation), `transfer_sheet` (Home/Bank→Godam, overdraft round-trip),
+  `godam_ledger_screen` (spend → "where this came from" FIFO sheet + View bill),
+  `roznamcha_screen` (day-grouped, per-day net + running balance, filters:
+  pool/direction/party/expense-category/date-range), `cash_entry_tile` (shared).
+- Screens (`presentation/payments/`): `new_payment_screen` (standalone payment +
+  manual allocation against open bills of the matching kind; remainder = advance),
+  `allocate_advance_screen` (place an existing advance via `AllocatePayment` —
+  PaymentAllocation only, no duplicate CashMovement), `reverse_payment_sheet`
+  (non-destructive bounce flow, from the Party Detail settlement timeline).
+- Wiring: "Cash & Godam" drawer destination; Party Detail overflow menu (Record
+  payment / Allocate advance / Edit / Trash) and tap-to-reverse on payment rows.
+- Tests: `test/data/cash_read_test.dart` (Godam spend traced to two funding
+  transfers oldest-first + reconciliation; bounced-cheque reopens the bill in the
+  read model). Also fixed a pre-existing Flutter-3.44 `ListTile`-in-`Container`
+  assertion by wrapping the party/category picker lists in a transparent `Material`.
+- Deferred to Phase 4/5: fl_chart profit chart + dashboard drill-downs, in-place
+  bill *field* editing, Supabase backup/sync.
 
 **Phase 2 — daily-use UI, DONE (built on the Phase-1 domain core):**
 - Auth/gate: `security/pin_service.dart` (Admin + optional View PIN, deterministic
@@ -169,8 +199,10 @@ proportion to weight, so the average of what remains is provably unchanged.
 
 ## Commands
 ```
-export PATH="/home/sami/Android/flutter/bin:$PATH"   # SDK lives here, not on PATH
+export PATH="<flutter-sdk>/bin:$PATH"   # SDK path is machine-specific, not on PATH by default
 flutter test test/domain/       # run domain unit tests (the actual bar)
 flutter analyze lib test
 ```
-Flutter 3.41.1 / Dart 3.11.0. Android SDK at `/home/sami/Android/Sdk`.
+Confirmed SDK locations seen so far (varies by machine — check yours, don't assume):
+- `/home/sami/Android/flutter` — Flutter 3.41.1 / Dart 3.11.0, Android SDK at `/home/sami/Android/Sdk`.
+- `/home/samiullah/Android/flutter` — Flutter 3.44.7.
